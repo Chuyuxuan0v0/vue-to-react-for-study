@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>组件开发迁移 - Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item active">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-breadcrumb">
+            <a href="index.html">首页</a>
+            <span>/</span>
+            <span>组件开发迁移</span>
+          </div>
+          <h1 class="page-title">
+            <span class="gradient-text">组件开发迁移</span>
+          </h1>
+          <p class="page-description">
+            掌握 React 组件开发模式：Props/Events、插槽迁移、Hooks 完整指南
+          </p>
+        </div>
+
+        <!-- Section 1: Props and Events -->
+        <section class="section" id="props-events">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📦</span>
+              Props 和 Events 对比
+            </h2>
+            <p class="section-subtitle">Vue 的 props/emit → React 的 props/回调函数</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="comment">&lt;!-- 父组件 --&gt;</span>
+<span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;ChildComponent</span>
+    <span class="attr-name">:name</span>=<span class="string">"name"</span>
+    <span class="attr-name">@update</span>=<span class="string">"handleUpdate"</span>
+  <span class="tag">/&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="comment">&lt;!-- 子组件 --&gt;</span>
+<span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;p&gt;</span>{{ name }}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr-name">@click</span>=<span class="string">"handleChange"</span><span class="tag">&gt;</span>
+      更新
+    <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">props</span>: {
+    <span class="property">name</span>: {
+      <span class="property">type</span>: String,
+      <span class="property">required</span>: <span class="keyword">true</span>
+    }
+  },
+  <span class="function">methods</span>: {
+    <span class="function">handleChange</span>() {
+      <span class="keyword">this</span>.$emit(<span class="string">'update'</span>, newValue)
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="comment">// 子组件类型定义</span>
+<span class="keyword">interface</span> <span class="class-name">ChildComponentProps</span> {
+  <span class="property">name</span>: <span class="type">string</span>
+  <span class="property">onUpdate</span>: (<span class="parameter">value</span>: <span class="type">string</span>) => <span class="type">void</span>
+}
+
+<span class="comment">// 子组件</span>
+<span class="keyword">const</span> <span class="function">ChildComponent</span>: <span class="type">React.FC</span>&lt;<span class="class-name">ChildComponentProps</span>&gt; = ({
+  name,
+  onUpdate
+}) => {
+  <span class="keyword">const</span> <span class="function">handleChange</span> = () => {
+    onUpdate(newValue)
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>{name}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="jsx-attr">onClick</span>={handleChange}<span class="tag">&gt;</span>
+        更新
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="comment">// 父组件</span>
+<span class="keyword">const</span> <span class="function">ParentComponent</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> [name, setName] = useState(<span class="string">''</span>)
+
+  <span class="keyword">const</span> <span class="function">handleUpdate</span> = (<span class="parameter">value</span>: <span class="type">string</span>) => {
+    setName(value)
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;ChildComponent</span>
+      <span class="jsx-attr">name</span>={name}
+      <span class="jsx-attr">onUpdate</span>={handleUpdate}
+    <span class="tag">/&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-content">
+              <p class="callout-title">关键差异</p>
+              <p class="callout-text">
+                Vue 使用 <code>$emit</code> 发送事件，React 通过 props 传递回调函数。
+                React 的命名习惯是 <code>on</code> 前缀（如 <code>onUpdate</code>、<code>onClick</code>）。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Slots Migration -->
+        <section class="section" id="slots">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🎰</span>
+              插槽迁移
+            </h2>
+            <p class="section-subtitle">Vue 插槽 → React children / Render Props</p>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Vue 插槽类型</th>
+                  <th>React 实现方式</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>默认插槽</code></td>
+                  <td><code>children</code> prop</td>
+                  <td>直接传递子元素</td>
+                </tr>
+                <tr>
+                  <td><code>具名插槽</code></td>
+                  <td>自定义 props</td>
+                  <td>如 <code>header</code>、<code>footer</code></td>
+                </tr>
+                <tr>
+                  <td><code>作用域插槽</code></td>
+                  <td>Render Props</td>
+                  <td>传递渲染函数</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>具名插槽示例</h3>
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="comment">&lt;!-- 布局组件 --&gt;</span>
+<span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr-name">class</span>=<span class="string">"layout"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;header&gt;</span>
+      <span class="tag">&lt;slot</span> <span class="attr-name">name</span>=<span class="string">"header"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/header&gt;</span>
+    <span class="tag">&lt;main&gt;</span>
+      <span class="tag">&lt;slot&gt;</span>默认内容<span class="tag">&lt;/slot&gt;</span>
+    <span class="tag">&lt;/main&gt;</span>
+    <span class="tag">&lt;footer&gt;</span>
+      <span class="tag">&lt;slot</span> <span class="attr-name">name</span>=<span class="string">"footer"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/footer&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="comment">&lt;!-- 使用 --&gt;</span>
+<span class="tag">&lt;BaseLayout&gt;</span>
+  <span class="tag">&lt;template</span> <span class="attr-name">#header</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h1&gt;</span>页面标题<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;/template&gt;</span>
+
+  <span class="tag">&lt;template</span> <span class="attr-name">#default</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;p&gt;</span>页面内容<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/template&gt;</span>
+
+  <span class="tag">&lt;template</span> <span class="attr-name">#footer</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;p&gt;</span>页脚信息<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/template&gt;</span>
+<span class="tag">&lt;/BaseLayout&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="comment">// 布局组件类型定义</span>
+<span class="keyword">interface</span> <span class="class-name">BaseLayoutProps</span> {
+  <span class="property">header</span>?: <span class="type">React.ReactNode</span>
+  <span class="property">children</span>: <span class="type">React.ReactNode</span>
+  <span class="property">footer</span>?: <span class="type">React.ReactNode</span>
+}
+
+<span class="comment">// 布局组件</span>
+<span class="keyword">const</span> <span class="function">BaseLayout</span>: <span class="type">React.FC</span>&lt;<span class="class-name">BaseLayoutProps</span>&gt; = ({
+  header,
+  children,
+  footer
+}) => (
+  <span class="tag">&lt;div</span> <span class="jsx-attr">className</span>=<span class="string">"layout"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;header&gt;</span>{header}<span class="tag">&lt;/header&gt;</span>
+    <span class="tag">&lt;main&gt;</span>{children}<span class="tag">&lt;/main&gt;</span>
+    <span class="tag">&lt;footer&gt;</span>{footer}<span class="tag">&lt;/footer&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+)
+
+<span class="comment">// 使用</span>
+<span class="tag">&lt;BaseLayout</span>
+  <span class="jsx-attr">header</span>={<span class="tag">&lt;h1&gt;</span>页面标题<span class="tag">&lt;/h1&gt;</span>}
+  <span class="jsx-attr">footer</span>={<span class="tag">&lt;p&gt;</span>页脚信息<span class="tag">&lt;/p&gt;</span>}
+<span class="tag">&gt;</span>
+  <span class="tag">&lt;p&gt;</span>页面内容<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/BaseLayout&gt;</span></code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Hooks Guide -->
+        <section class="section" id="hooks">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🪝</span>
+              Hooks 完整指南
+            </h2>
+            <p class="section-subtitle">React Hooks 是函数式组件的核心，替代 Class 组件的状态和生命周期</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">📦</div>
+                <div>
+                  <h3 class="card-title">useState</h3>
+                  <span class="card-badge">状态管理</span>
+                </div>
+              </div>
+              <p>替代 Vue 的 <code>data()</code>，用于声明组件状态</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🔄</div>
+                <div>
+                  <h3 class="card-title">useEffect</h3>
+                  <span class="card-badge">副作用处理</span>
+                </div>
+              </div>
+              <p>替代 Vue 的 <code>mounted</code>、<code>updated</code>、<code>watch</code></p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">⚡</div>
+                <div>
+                  <h3 class="card-title">useMemo</h3>
+                  <span class="card-badge">性能优化</span>
+                </div>
+              </div>
+              <p>替代 Vue 的 <code>computed</code>，缓存计算结果</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🔒</div>
+                <div>
+                  <h3 class="card-title">useCallback</h3>
+                  <span class="card-badge">函数缓存</span>
+                </div>
+              </div>
+              <p>缓存函数引用，避免不必要的子组件重渲染</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🎯</div>
+                <div>
+                  <h3 class="card-title">useRef</h3>
+                  <span class="card-badge">DOM 引用</span>
+                </div>
+              </div>
+              <p>替代 Vue 的 <code>ref</code>，获取 DOM 元素或保存可变值</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🌐</div>
+                <div>
+                  <h3 class="card-title">useContext</h3>
+                  <span class="card-badge">跨组件通信</span>
+                </div>
+              </div>
+              <p>替代 Vue 的 <code>provide/inject</code></p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">📊</div>
+                <div>
+                  <h3 class="card-title">useReducer</h3>
+                  <span class="card-badge">复杂状态逻辑</span>
+                </div>
+              </div>
+              <p>替代 Vuex，处理复杂的状态管理逻辑</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">⏱️</div>
+                <div>
+                  <h3 class="card-title">自定义 Hooks</h3>
+                  <span class="card-badge">逻辑复用</span>
+                </div>
+              </div>
+              <p>替代 Vue 的 <code>mixin</code>，实现逻辑复用</p>
+            </div>
+          </div>
+
+          <h3>useState 基础用法</h3>
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;p&gt;</span>计数: {{ count }}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr-name">@click</span>=<span class="string">"increment"</span><span class="tag">&gt;</span>+1<span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">count</span>: <span class="number">0</span>
+    }
+  },
+  <span class="function">methods</span>: {
+    <span class="function">increment</span>() {
+      <span class="keyword">this</span>.count++
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">const</span> <span class="function">Counter</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> [count, setCount] = useState&lt;<span class="type">number</span>&gt;(<span class="number">0</span>)
+
+  <span class="keyword">const</span> <span class="function">increment</span> = () => {
+    setCount(prev => prev + <span class="number">1</span>)
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>计数: {count}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="jsx-attr">onClick</span>={increment}<span class="tag">&gt;</span>+1<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+
+          <h3>useEffect 副作用处理</h3>
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">data</span>: <span class="keyword">null</span>,
+      <span class="property">loading</span>: <span class="keyword">true</span>
+    }
+  },
+  <span class="function">mounted</span>() {
+    <span class="keyword">this</span>.fetchData()
+  },
+  <span class="function">watch</span>: {
+    <span class="function">id</span>(newId) {
+      <span class="keyword">this</span>.fetchData()
+    }
+  },
+  <span class="function">beforeDestroy</span>() {
+    <span class="comment">// 清理工作</span>
+  },
+  <span class="function">methods</span>: {
+    <span class="keyword">async</span> <span class="function">fetchData</span>() {
+      <span class="keyword">this</span>.loading = <span class="keyword">true</span>
+      <span class="keyword">this</span>.data = <span class="keyword">await</span> api.getData(<span class="keyword">this</span>.id)
+      <span class="keyword">this</span>.loading = <span class="keyword">false</span>
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="keyword">import</span> { useState, useEffect } <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">const</span> <span class="function">DataComponent</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> [data, setData] = useState&lt;<span class="type">any</span>&gt;(<span class="keyword">null</span>)
+  <span class="keyword">const</span> [loading, setLoading] = useState&lt;<span class="type">boolean</span>&gt;(<span class="keyword">true</span>)
+
+  <span class="comment">// 组件挂载时执行（类似 mounted）</span>
+  useEffect(() => {
+    <span class="keyword">const</span> <span class="function">fetchData</span> = <span class="keyword">async</span> () => {
+      setLoading(<span class="keyword">true</span>)
+      <span class="keyword">const</span> result = <span class="keyword">await</span> api.getData(id)
+      setData(result)
+      setLoading(<span class="keyword">false</span>)
+    }
+
+    fetchData()
+
+    <span class="comment">// 返回清理函数（类似 beforeDestroy）</span>
+    <span class="keyword">return</span> () => {
+      <span class="comment">// 清理工作</span>
+    }
+  }, [id]) <span class="comment">// 依赖数组（类似 watch）</span>
+
+  <span class="keyword">if</span> (loading) <span class="keyword">return</span> <span class="tag">&lt;div&gt;</span>Loading...<span class="tag">&lt;/div&gt;</span>
+
+  <span class="keyword">return</span> <span class="tag">&lt;div&gt;</span>{data}<span class="tag">&lt;/div&gt;</span>
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Custom Hooks -->
+        <section class="section" id="custom-hooks">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔧</span>
+              自定义 Hooks
+            </h2>
+            <p class="section-subtitle">替代 Vue 的 mixin，实现逻辑复用</p>
+          </div>
+
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div class="callout-content">
+              <p class="callout-title">自定义 Hooks vs Mixin</p>
+              <p class="callout-text">
+                Vue 的 mixin 存在命名冲突和隐式依赖的问题。
+                React 的自定义 Hooks 是显式的，返回值和参数都清晰可见，更容易理解和维护。
+              </p>
+            </div>
+          </div>
+
+          <h3>表单状态管理 Hook</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">useForm.ts</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">import</span> { useState, useCallback } <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">interface</span> <span class="class-name">UseFormOptions</span>&lt;<span class="type">T</span>&gt; {
+  <span class="property">initialValues</span>: <span class="type">T</span>
+  <span class="property">onSubmit</span>: (<span class="parameter">values</span>: <span class="type">T</span>) => <span class="type">Promise</span>&lt;<span class="type">void</span>&gt;
+  <span class="property">validate</span>?: (<span class="parameter">values</span>: <span class="type">T</span>) => <span class="type">Partial</span>&lt;<span class="type">Record</span>&lt;<span class="keyword">keyof</span> <span class="type">T</span>, <span class="type">string</span>&gt;&gt;
+}
+
+<span class="keyword">export</span> <span class="keyword">function</span> <span class="function">useForm</span>&lt;<span class="type">T</span> <span class="keyword">extends</span> <span class="type">Record</span>&lt;<span class="type">string</span>, <span class="type">any</span>&gt;&gt;({
+  initialValues,
+  onSubmit,
+  validate
+}: <span class="class-name">UseFormOptions</span>&lt;<span class="type">T</span>&gt;) {
+  <span class="keyword">const</span> [values, setValues] = useState&lt;<span class="type">T</span>&gt;(initialValues)
+  <span class="keyword">const</span> [errors, setErrors] = useState&lt;<span class="type">Partial</span>&lt;<span class="type">Record</span>&lt;<span class="keyword">keyof</span> <span class="type">T</span>, <span class="type">string</span>&gt;&gt;&gt;({})
+  <span class="keyword">const</span> [submitting, setSubmitting] = useState(<span class="keyword">false</span>)
+
+  <span class="keyword">const</span> <span class="function">handleChange</span> = useCallback((
+    <span class="parameter">field</span>: <span class="keyword">keyof</span> <span class="type">T</span>,
+    <span class="parameter">value</span>: <span class="type">T</span>[<span class="keyword">keyof</span> <span class="type">T</span>]
+  ) => {
+    setValues(<span class="parameter">prev</span> => ({ ...prev, [field]: value }))
+    <span class="comment">// 清除该字段的错误</span>
+    <span class="keyword">if</span> (errors[field]) {
+      setErrors(<span class="parameter">prev</span> => {
+        <span class="keyword">const</span> newErrors = { ...prev }
+        <span class="keyword">delete</span> newErrors[field]
+        <span class="keyword">return</span> newErrors
+      })
+    }
+  }, [errors])
+
+  <span class="keyword">const</span> <span class="function">handleSubmit</span> = useCallback(<span class="keyword">async</span> (<span class="parameter">e</span>: React.FormEvent) => {
+    e.preventDefault()
+
+    <span class="comment">// 验证</span>
+    <span class="keyword">if</span> (validate) {
+      <span class="keyword">const</span> validationErrors = validate(values)
+      <span class="keyword">if</span> (Object.keys(validationErrors).length > <span class="number">0</span>) {
+        setErrors(validationErrors)
+        <span class="keyword">return</span>
+      }
+    }
+
+    setSubmitting(<span class="keyword">true</span>)
+    <span class="keyword">try</span> {
+      <span class="keyword">await</span> onSubmit(values)
+    } <span class="keyword">catch</span> (error) {
+      console.error(<span class="string">'提交失败:'</span>, error)
+    } <span class="keyword">finally</span> {
+      setSubmitting(<span class="keyword">false</span>)
+    }
+  }, [values, validate, onSubmit])
+
+  <span class="keyword">const</span> <span class="function">reset</span> = useCallback(() => {
+    setValues(initialValues)
+    setErrors({})
+  }, [initialValues])
+
+  <span class="keyword">return</span> {
+    values,
+    errors,
+    submitting,
+    handleChange,
+    handleSubmit,
+    reset
+  }
+}</code></pre>
+          </div>
+
+          <h3>使用示例</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">LoginForm.tsx</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">const</span> <span class="function">LoginForm</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> {
+    values,
+    errors,
+    submitting,
+    handleChange,
+    handleSubmit
+  } = useForm({
+    <span class="property">initialValues</span>: {
+      <span class="property">username</span>: <span class="string">''</span>,
+      <span class="property">password</span>: <span class="string">''</span>
+    },
+    <span class="property">validate</span>: (<span class="parameter">values</span>) => {
+      <span class="keyword">const</span> errors: <span class="type">Record</span>&lt;<span class="type">string</span>, <span class="type">string</span>&gt; = {}
+      <span class="keyword">if</span> (!values.username) errors.username = <span class="string">'请输入用户名'</span>
+      <span class="keyword">if</span> (!values.password) errors.password = <span class="string">'请输入密码'</span>
+      <span class="keyword">return</span> errors
+    },
+    <span class="property">onSubmit</span>: <span class="keyword">async</span> (<span class="parameter">values</span>) => {
+      <span class="keyword">await</span> api.login(values)
+    }
+  })
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;form</span> <span class="jsx-attr">onSubmit</span>={handleSubmit}<span class="tag">&gt;</span>
+      <span class="tag">&lt;input</span>
+        <span class="jsx-attr">value</span>={values.username}
+        <span class="jsx-attr">onChange</span>={(<span class="parameter">e</span>) => handleChange(<span class="string">'username'</span>, e.target.value)}
+      <span class="tag">/&gt;</span>
+      {errors.username && <span class="tag">&lt;span&gt;</span>{errors.username}<span class="tag">&lt;/span&gt;</span>}
+
+      <span class="tag">&lt;input</span>
+        <span class="jsx-attr">type</span>=<span class="string">"password"</span>
+        <span class="jsx-attr">value</span>={values.password}
+        <span class="jsx-attr">onChange</span>={(<span class="parameter">e</span>) => handleChange(<span class="string">'password'</span>, e.target.value)}
+      <span class="tag">/&gt;</span>
+      {errors.password && <span class="tag">&lt;span&gt;</span>{errors.password}<span class="tag">&lt;/span&gt;</span>}
+
+      <span class="tag">&lt;button</span> <span class="jsx-attr">disabled</span>={submitting}<span class="tag">&gt;</span>
+        {submitting ? <span class="string">'登录中...'</span> : <span class="string">'登录'</span>}
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/form&gt;</span>
+  )
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 5: Class Components -->
+        <section class="section" id="class-components">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📦</span>
+              Class 组件（简要说明）
+            </h2>
+            <p class="section-subtitle">了解即可，推荐使用 Hooks</p>
+          </div>
+
+          <div class="callout warning">
+            <span class="callout-icon">⚠️</span>
+            <div class="callout-content">
+              <p class="callout-title">推荐使用 Hooks</p>
+              <p class="callout-text">
+                Class 组件是 React 的旧写法，虽然仍然支持，但官方推荐使用函数式组件 + Hooks。
+                新项目应该优先使用 Hooks。
+              </p>
+            </div>
+          </div>
+
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">Counter.tsx (Class 组件)</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">interface</span> <span class="class-name">Props</span> {
+  <span class="property">name</span>: <span class="type">string</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">State</span> {
+  <span class="property">count</span>: <span class="type">number</span>
+}
+
+<span class="keyword">class</span> <span class="class-name">Counter</span> <span class="keyword">extends</span> <span class="class-name">React.Component</span>&lt;<span class="class-name">Props</span>, <span class="class-name">State</span>&gt; {
+  <span class="property">state</span>: <span class="class-name">State</span> = { <span class="property">count</span>: <span class="number">0</span> }
+
+  <span class="function">handleClick</span> = () => {
+    <span class="keyword">this</span>.setState({ <span class="property">count</span>: <span class="keyword">this</span>.state.count + <span class="number">1</span> })
+  }
+
+  <span class="function">componentDidMount</span>() {
+    <span class="comment">// 类似 Vue mounted</span>
+    console.log(<span class="string">'组件已挂载'</span>)
+  }
+
+  <span class="function">componentDidUpdate</span>(<span class="parameter">prevProps</span>: <span class="class-name">Props</span>) {
+    <span class="comment">// 类似 Vue updated</span>
+    <span class="keyword">if</span> (<span class="keyword">this</span>.props.name !== prevProps.name) {
+      console.log(<span class="string">'name 发生变化'</span>)
+    }
+  }
+
+  <span class="function">componentWillUnmount</span>() {
+    <span class="comment">// 类似 Vue beforeDestroy</span>
+    console.log(<span class="string">'组件将要卸载'</span>)
+  }
+
+  <span class="function">render</span>() {
+    <span class="keyword">return</span> (
+      <span class="tag">&lt;div&gt;</span>
+        <span class="tag">&lt;p&gt;</span>{<span class="keyword">this</span>.props.name}: {<span class="keyword">this</span>.state.count}<span class="tag">&lt;/p&gt;</span>
+        <span class="tag">&lt;button</span> <span class="jsx-attr">onClick</span>={<span class="keyword">this</span>.handleClick}<span class="tag">&gt;</span>+1<span class="tag">&lt;/button&gt;</span>
+      <span class="tag">&lt;/div&gt;</span>
+    )
+  }
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Navigation -->
+        <div style="display: flex; justify-content: space-between; margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--border-color);">
+          <a href="01-core-concepts.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); text-decoration: none;">
+            ← 核心概念对比
+          </a>
+          <a href="03-dva.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--vue-primary); text-decoration: none; font-weight: 600;">
+            dva 数据流 →
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

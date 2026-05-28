@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>路由迁移 - Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item active">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-breadcrumb">
+            <a href="index.html">首页</a>
+            <span>/</span>
+            <span>路由迁移</span>
+          </div>
+          <h1 class="page-title">
+            <span class="gradient-text">路由迁移</span>
+          </h1>
+          <p class="page-description">
+            Vue Router → React Router v5 完整对照
+          </p>
+        </div>
+
+        <!-- Section 1: Quick Reference -->
+        <section class="section" id="reference">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📋</span>
+              快速对照表
+            </h2>
+            <p class="section-subtitle">Vue Router 核心 API → React Router v5</p>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Vue Router</th>
+                  <th>React Router v5</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>&lt;router-view&gt;</code></td>
+                  <td><code>&lt;Route component={...}&gt;</code></td>
+                  <td>路由出口</td>
+                </tr>
+                <tr>
+                  <td><code>&lt;router-link&gt;</code></td>
+                  <td><code>&lt;Link&gt;</code> / <code>&lt;NavLink&gt;</code></td>
+                  <td>声明式导航</td>
+                </tr>
+                <tr>
+                  <td><code>$route.params</code></td>
+                  <td><code>useParams()</code></td>
+                  <td>路由参数</td>
+                </tr>
+                <tr>
+                  <td><code>$route.query</code></td>
+                  <td><code>useSearchParams()</code></td>
+                  <td>查询参数</td>
+                </tr>
+                <tr>
+                  <td><code>$router.push()</code></td>
+                  <td><code>useHistory().push()</code></td>
+                  <td>编程式导航</td>
+                </tr>
+                <tr>
+                  <td><code>beforeEach</code></td>
+                  <td><code>&lt;Route render&gt;</code> 或自定义 Hook</td>
+                  <td>路由守卫</td>
+                </tr>
+                <tr>
+                  <td>嵌套路由</td>
+                  <td>嵌套 <code>&lt;Route&gt;</code></td>
+                  <td>子路由配置</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Section 2: Router Setup -->
+        <section class="section" id="setup">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">⚙️</span>
+              路由配置
+            </h2>
+            <p class="section-subtitle">Vue Router 配置 vs React Router 配置</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2 + Vue Router
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + React Router v5
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="comment">// router/index.ts</span>
+<span class="keyword">import</span> VueRouter <span class="keyword">from</span> <span class="string">'vue-router'</span>
+
+<span class="keyword">const</span> routes = [
+  {
+    <span class="property">path</span>: <span class="string">'/'</span>,
+    <span class="property">component</span>: Home
+  },
+  {
+    <span class="property">path</span>: <span class="string">'/user/:id'</span>,
+    <span class="property">component</span>: UserLayout,
+    <span class="property">children</span>: [
+      { <span class="property">path</span>: <span class="string">''</span>, <span class="property">component</span>: UserProfile },
+      { <span class="property">path</span>: <span class="string">'posts'</span>, <span class="property">component</span>: UserPosts }
+    ]
+  }
+]
+
+<span class="keyword">const</span> router = <span class="keyword">new</span> VueRouter({
+  <span class="property">mode</span>: <span class="string">'history'</span>,
+  routes
+})</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="comment">// App.tsx</span>
+<span class="keyword">import</span> {
+  BrowserRouter,
+  Route,
+  Switch
+} <span class="keyword">from</span> <span class="string">'react-router-dom'</span>
+
+<span class="keyword">const</span> <span class="function">App</span>: <span class="type">React.FC</span> = () => (
+  <span class="tag">&lt;BrowserRouter&gt;</span>
+    <span class="tag">&lt;Switch&gt;</span>
+      <span class="tag">&lt;Route</span>
+        <span class="jsx-attr">exact</span>
+        <span class="jsx-attr">path</span>=<span class="string">"/"</span>
+        <span class="jsx-attr">component</span>={Home}
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;Route</span>
+        <span class="jsx-attr">path</span>=<span class="string">"/user/:id"</span>
+        <span class="jsx-attr">component</span>={UserLayout}
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/Switch&gt;</span>
+  <span class="tag">&lt;/BrowserRouter&gt;</span>
+)
+
+<span class="comment">// UserLayout.tsx - 嵌套路由</span>
+<span class="keyword">const</span> <span class="function">UserLayout</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> { id } = useParams&lt;{ <span class="property">id</span>: <span class="type">string</span> }&gt;()
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>User {id}<span class="tag">&lt;/h1&gt;</span>
+      <span class="tag">&lt;Route</span>
+        <span class="jsx-attr">exact</span>
+        <span class="jsx-attr">path</span>=<span class="string">"/user/:id"</span>
+        <span class="jsx-attr">component</span>={UserProfile}
+      <span class="tag">/&gt;</span>
+      <span class="tag">&lt;Route</span>
+        <span class="jsx-attr">path</span>=<span class="string">"/user/:id/posts"</span>
+        <span class="jsx-attr">component</span>={UserPosts}
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 3: Route Params -->
+        <section class="section" id="params">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔗</span>
+              路由参数
+            </h2>
+            <p class="section-subtitle">获取路由参数和查询参数</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="tag">&lt;p&gt;</span>用户ID: {{ $route.params.id }}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;p&gt;</span>搜索: {{ $route.query.keyword }}<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">computed</span>: {
+    <span class="function">userId</span>() {
+      <span class="keyword">return</span> <span class="keyword">this</span>.$route.params.id
+    },
+    <span class="function">keyword</span>() {
+      <span class="keyword">return</span> <span class="keyword">this</span>.$route.query.keyword
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="keyword">import</span> { useParams, useSearchParams } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>
+
+<span class="keyword">const</span> <span class="function">UserPage</span>: <span class="type">React.FC</span> = () => {
+  <span class="comment">// 获取路由参数</span>
+  <span class="keyword">const</span> { id } = useParams&lt;{ <span class="property">id</span>: <span class="type">string</span> }&gt;()
+
+  <span class="comment">// 获取查询参数</span>
+  <span class="keyword">const</span> [searchParams] = useSearchParams()
+  <span class="keyword">const</span> keyword = searchParams.get(<span class="string">'keyword'</span>)
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;p&gt;</span>用户ID: {id}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;p&gt;</span>搜索: {keyword}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Programmatic Navigation -->
+        <section class="section" id="navigation">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🚀</span>
+              编程式导航
+            </h2>
+            <p class="section-subtitle">跳转页面、替换路由</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">methods</span>: {
+    <span class="comment">// 跳转到新页面（可后退）</span>
+    <span class="function">goToUser</span>(id) {
+      <span class="keyword">this</span>.$router.push(<span class="string">`/user/${id}`</span>)
+    },
+
+    <span class="comment">// 带查询参数</span>
+    <span class="function">search</span>(keyword) {
+      <span class="keyword">this</span>.$router.push({
+        <span class="property">path</span>: <span class="string">'/search'</span>,
+        <span class="property">query</span>: { keyword }
+      })
+    },
+
+    <span class="comment">// 替换当前路由（不可后退）</span>
+    <span class="function">replaceRoute</span>() {
+      <span class="keyword">this</span>.$router.replace(<span class="string">'/login'</span>)
+    },
+
+    <span class="comment">// 后退</span>
+    <span class="function">goBack</span>() {
+      <span class="keyword">this</span>.$router.go(-<span class="number">1</span>)
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="keyword">import</span> { useHistory } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>
+
+<span class="keyword">const</span> <span class="function">MyComponent</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> history = useHistory()
+
+  <span class="comment">// 跳转到新页面（可后退）</span>
+  <span class="keyword">const</span> <span class="function">goToUser</span> = (<span class="parameter">id</span>: <span class="type">string</span>) => {
+    history.push(<span class="string">`/user/${id}`</span>)
+  }
+
+  <span class="comment">// 带查询参数</span>
+  <span class="keyword">const</span> <span class="function">search</span> = (<span class="parameter">keyword</span>: <span class="type">string</span>) => {
+    history.push({
+      <span class="property">pathname</span>: <span class="string">'/search'</span>,
+      <span class="property">search</span>: <span class="string">`?keyword=${keyword}`</span>
+    })
+  }
+
+  <span class="comment">// 替换当前路由（不可后退）</span>
+  <span class="keyword">const</span> <span class="function">replaceRoute</span> = () => {
+    history.replace(<span class="string">'/login'</span>)
+  }
+
+  <span class="comment">// 后退</span>
+  <span class="keyword">const</span> <span class="function">goBack</span> = () => {
+    history.goBack()
+  }
+
+  <span class="keyword">return</span> ( <span class="comment">/* JSX */</span> )
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 5: Route Guards -->
+        <section class="section" id="guards">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🛡️</span>
+              路由守卫
+            </h2>
+            <p class="section-subtitle">Vue Router beforeEach → React 自定义 Hook</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="comment">// router/index.ts</span>
+router.beforeEach((<span class="parameter">to</span>, <span class="parameter">from</span>, <span class="parameter">next</span>) => {
+  <span class="keyword">const</span> isAuthenticated = !!localStorage.getItem(<span class="string">'token'</span>)
+
+  <span class="keyword">if</span> (to.meta.requiresAuth && !isAuthenticated) {
+    <span class="comment">// 未登录，跳转到登录页</span>
+    next(<span class="string">'/login'</span>)
+  } <span class="keyword">else</span> {
+    <span class="comment">// 允许访问</span>
+    next()
+  }
+})</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="comment">// hooks/useAuth.ts</span>
+<span class="keyword">import</span> { useEffect } <span class="keyword">from</span> <span class="string">'react'</span>
+<span class="keyword">import</span> { useHistory } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>
+
+<span class="keyword">export</span> <span class="keyword">function</span> <span class="function">useAuth</span>(<span class="parameter">requireAuth</span> = <span class="keyword">true</span>) {
+  <span class="keyword">const</span> history = useHistory()
+  <span class="keyword">const</span> isAuthenticated = !!localStorage.getItem(<span class="string">'token'</span>)
+
+  useEffect(() => {
+    <span class="keyword">if</span> (requireAuth && !isAuthenticated) {
+      history.replace(<span class="string">'/login'</span>)
+    }
+  }, [requireAuth, isAuthenticated, history])
+
+  <span class="keyword">return</span> { isAuthenticated }
+}
+
+<span class="comment">// 在需要认证的页面使用</span>
+<span class="keyword">const</span> <span class="function">Dashboard</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> { isAuthenticated } = useAuth()
+
+  <span class="keyword">if</span> (!isAuthenticated) {
+    <span class="keyword">return</span> <span class="keyword">null</span> <span class="comment">// 或加载中</span>
+  }
+
+  <span class="keyword">return</span> <span class="tag">&lt;div&gt;</span>仪表盘<span class="tag">&lt;/div&gt;</span>
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navigation -->
+        <div style="display: flex; justify-content: space-between; margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--border-color);">
+          <a href="03-dva.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); text-decoration: none;">
+            ← dva 数据流
+          </a>
+          <a href="05-webpack.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--vue-primary); text-decoration: none; font-weight: 600;">
+            Webpack 4 →
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

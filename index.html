@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: var(--space-16) 0 var(--space-12);
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background: linear-gradient(135deg, var(--vue-light), var(--react-light));
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-6);
+    }
+
+    .hero-badge-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--space-6);
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto var(--space-8);
+    }
+
+    .hero-tech-stack {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-6);
+      flex-wrap: wrap;
+    }
+
+    .tech-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 14px;
+      transition: all var(--transition-fast);
+    }
+
+    .tech-item:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .tech-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .tech-dot.vue { background: var(--vue-primary); }
+    .tech-dot.react { background: var(--react-primary); }
+    .tech-dot.dva { background: var(--accent-purple); }
+    .tech-dot.webpack { background: #8dd6f9; }
+    .tech-dot.ts { background: #3178c6; }
+
+    .tech-arrow {
+      color: var(--text-muted);
+      font-size: 20px;
+    }
+
+    /* Module Cards */
+    .modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--space-6);
+      margin-top: var(--space-10);
+    }
+
+    .module-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      text-decoration: none;
+      color: inherit;
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--vue-primary), var(--react-primary));
+      opacity: 0;
+      transition: opacity var(--transition-fast);
+    }
+
+    .module-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-4px);
+    }
+
+    .module-card:hover::before {
+      opacity: 1;
+    }
+
+    .module-number {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--vue-light), var(--react-light));
+      border-radius: var(--radius-md);
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: var(--space-4);
+    }
+
+    .module-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: var(--space-2);
+    }
+
+    .module-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-4);
+      line-height: 1.5;
+    }
+
+    .module-meta {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .module-meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+    }
+
+    /* Learning Path */
+    .learning-path {
+      margin-top: var(--space-12);
+      padding: var(--space-8);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+
+    .path-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: var(--space-6);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .path-steps {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .path-steps::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--border-color);
+      transform: translateY(-50%);
+    }
+
+    .path-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .path-step-dot {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-secondary);
+      border: 2px solid var(--vue-primary);
+      border-radius: 50%;
+      font-weight: 700;
+      font-size: 16px;
+      color: var(--vue-primary);
+    }
+
+    .path-step:nth-child(3) .path-step-dot,
+    .path-step:nth-child(4) .path-step-dot,
+    .path-step:nth-child(5) .path-step-dot {
+      border-color: var(--react-primary);
+      color: var(--react-primary);
+    }
+
+    .path-step-label {
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      max-width: 100px;
+    }
+
+    /* Quick Start */
+    .quick-start {
+      margin-top: var(--space-12);
+      text-align: center;
+    }
+
+    .quick-start-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-4) var(--space-8);
+      background: linear-gradient(135deg, var(--vue-primary), var(--react-primary));
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-md);
+    }
+
+    .quick-start-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.25rem;
+      }
+
+      .path-steps {
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+
+      .path-steps::before {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item active">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Hero Section -->
+        <section class="hero">
+          <div class="hero-badge animate-in">
+            <span class="hero-badge-dot"></span>
+            快速迁移 · 无缝上手
+          </div>
+          <h1 class="hero-title animate-in animate-delay-1">
+            <span class="gradient-text">Vue 2 → React</span><br>
+            技术栈迁移指南
+          </h1>
+          <p class="hero-subtitle animate-in animate-delay-2">
+            为 Vue 2 开发者量身定制，快速掌握 React + dva + Webpack 4 全家桶
+          </p>
+          <div class="hero-tech-stack animate-in animate-delay-3">
+            <span class="tech-item">
+              <span class="tech-dot vue"></span>
+              Vue 2
+            </span>
+            <span class="tech-arrow">→</span>
+            <span class="tech-item">
+              <span class="tech-dot react"></span>
+              React 18
+            </span>
+            <span class="tech-item">
+              <span class="tech-dot dva"></span>
+              dva
+            </span>
+            <span class="tech-item">
+              <span class="tech-dot webpack"></span>
+              Webpack 4
+            </span>
+            <span class="tech-item">
+              <span class="tech-dot ts"></span>
+              TypeScript
+            </span>
+          </div>
+        </section>
+
+        <!-- Module Cards -->
+        <section>
+          <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: var(--space-6);">
+            学习模块
+          </h2>
+          <div class="modules-grid">
+            <a href="01-core-concepts.html" class="module-card">
+              <div class="module-number">1</div>
+              <h3 class="module-title">核心概念对比</h3>
+              <p class="module-desc">响应式原理、生命周期、模板语法的 Vue → React 映射</p>
+              <div class="module-meta">
+                <span class="module-meta-item">⏱ 约 30 分钟</span>
+                <span class="module-meta-item">📝 12 个对照表</span>
+              </div>
+            </a>
+
+            <a href="02-component.html" class="module-card">
+              <div class="module-number">2</div>
+              <h3 class="module-title">组件开发迁移</h3>
+              <p class="module-desc">Props/Events、插槽、Hooks 完整指南</p>
+              <div class="module-meta">
+                <span class="module-meta-item">⏱ 约 45 分钟</span>
+                <span class="module-meta-item">📝 8 个代码示例</span>
+              </div>
+            </a>
+
+            <a href="03-dva.html" class="module-card">
+              <div class="module-number">3</div>
+              <h3 class="module-title">dva 数据流</h3>
+              <p class="module-desc">Model、Effect、Subscription 完整用法</p>
+              <div class="module-meta">
+                <span class="module-meta-item">⏱ 约 60 分钟</span>
+                <span class="module-meta-item">📝 15 个代码示例</span>
+              </div>
+            </a>
+
+            <a href="04-routing.html" class="module-card">
+              <div class="module-number">4</div>
+              <h3 class="module-title">路由迁移</h3>
+              <p class="module-desc">Vue Router → React Router v5 完整对照</p>
+              <div class="module-meta">
+                <span class="module-meta-item">⏱ 约 20 分钟</span>
+                <span class="module-meta-item">📝 6 个对照表</span>
+              </div>
+            </a>
+
+            <a href="05-webpack.html" class="module-card">
+              <div class="module-number">5</div>
+              <h3 class="module-title">Webpack 4</h3>
+              <p class="module-desc">配置对比、常用 Loader/Plugin 说明</p>
+              <div class="module-meta">
+                <span class="module-meta-item">⏱ 约 25 分钟</span>
+                <span class="module-meta-item">📝 5 个配置示例</span>
+              </div>
+            </a>
+
+            <a href="06-patterns.html" class="module-card">
+              <div class="module-number">6</div>
+              <h3 class="module-title">业务场景对照</h3>
+              <p class="module-desc">列表查询、表单提交、权限控制等高频场景</p>
+              <div class="module-meta">
+                <span class="module-meta-item">⏱ 约 40 分钟</span>
+                <span class="module-meta-item">📝 6 个完整案例</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <!-- Learning Path -->
+        <section class="learning-path">
+          <h2 class="path-title">
+            📚 建议学习路线
+          </h2>
+          <div class="path-steps">
+            <div class="path-step">
+              <div class="path-step-dot">1</div>
+              <span class="path-step-label">核心概念</span>
+            </div>
+            <div class="path-step">
+              <div class="path-step-dot">2</div>
+              <span class="path-step-label">组件开发</span>
+            </div>
+            <div class="path-step">
+              <div class="path-step-dot">3</div>
+              <span class="path-step-label">dva 数据流</span>
+            </div>
+            <div class="path-step">
+              <div class="path-step-dot">4</div>
+              <span class="path-step-label">路由 & Webpack</span>
+            </div>
+            <div class="path-step">
+              <div class="path-step-dot">5</div>
+              <span class="path-step-label">业务实战</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section class="quick-start">
+          <a href="01-core-concepts.html" class="quick-start-btn">
+            开始学习 →
+          </a>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

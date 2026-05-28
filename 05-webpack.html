@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webpack 4 配置 - Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item active">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-breadcrumb">
+            <a href="index.html">首页</a>
+            <span>/</span>
+            <span>Webpack 4</span>
+          </div>
+          <h1 class="page-title">
+            <span class="gradient-text">Webpack 4 配置</span>
+          </h1>
+          <p class="page-description">
+            Vue CLI vs Webpack 4 配置对比、常用 Loader 和 Plugin
+          </p>
+        </div>
+
+        <!-- Section 1: Config Comparison -->
+        <section class="section" id="comparison">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">⚖️</span>
+              配置对比
+            </h2>
+            <p class="section-subtitle">Vue CLI 配置 vs Webpack 4 原生配置</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue CLI (vue.config.js)
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                Webpack 4 (webpack.config.js)
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="comment">// vue.config.js</span>
+module.exports = {
+  <span class="property">publicPath</span>: <span class="string">'/'</span>,
+  <span class="property">outputDir</span>: <span class="string">'dist'</span>,
+  <span class="property">assetsDir</span>: <span class="string">'static'</span>,
+  <span class="property">lintOnSave</span>: <span class="keyword">true</span>,
+  <span class="property">devServer</span>: {
+    <span class="property">port</span>: <span class="number">8080</span>,
+    <span class="property">proxy</span>: {
+      <span class="string">'/api'</span>: {
+        <span class="property">target</span>: <span class="string">'http://localhost:3000'</span>,
+        <span class="property">changeOrigin</span>: <span class="keyword">true</span>
+      }
+    }
+  },
+  <span class="function">configureWebpack</span>: {
+    <span class="comment">// 简单配置</span>
+    <span class="property">resolve</span>: {
+      <span class="property">alias</span>: {
+        <span class="string">'@'</span>: path.resolve(__dirname, <span class="string">'src'</span>)
+      }
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="comment">// webpack.config.js</span>
+<span class="keyword">const</span> path = require(<span class="string">'path'</span>)
+<span class="keyword">const</span> HtmlWebpackPlugin = require(<span class="string">'html-webpack-plugin'</span>)
+
+module.exports = {
+  <span class="property">mode</span>: <span class="string">'development'</span>,
+  <span class="property">entry</span>: <span class="string">'./src/index.tsx'</span>,
+  <span class="property">output</span>: {
+    <span class="property">path</span>: path.resolve(__dirname, <span class="string">'dist'</span>),
+    <span class="property">filename</span>: <span class="string">'bundle.[hash].js'</span>,
+    <span class="property">publicPath</span>: <span class="string">'/'</span>
+  },
+  <span class="property">module</span>: {
+    <span class="property">rules</span>: [
+      {
+        <span class="property">test</span>: /\.tsx?$/,
+        <span class="property">use</span>: <span class="string">'ts-loader'</span>,
+        <span class="property">exclude</span>: /node_modules/
+      },
+      {
+        <span class="property">test</span>: /\.less$/,
+        <span class="property">use</span>: [
+          <span class="string">'style-loader'</span>,
+          <span class="string">'css-loader'</span>,
+          <span class="string">'less-loader'</span>
+        ]
+      }
+    ]
+  },
+  <span class="property">resolve</span>: {
+    <span class="property">extensions</span>: [<span class="string">'.tsx'</span>, <span class="string">'.ts'</span>, <span class="string">'.js'</span>],
+    <span class="property">alias</span>: {
+      <span class="string">'@'</span>: path.resolve(__dirname, <span class="string">'src'</span>)
+    }
+  },
+  <span class="property">plugins</span>: [
+    <span class="keyword">new</span> HtmlWebpackPlugin({
+      <span class="property">template</span>: <span class="string">'./public/index.html'</span>
+    })
+  ],
+  <span class="property">devServer</span>: {
+    <span class="property">port</span>: <span class="number">8080</span>,
+    <span class="property">historyApiFallback</span>: <span class="keyword">true</span>,
+    <span class="property">proxy</span>: {
+      <span class="string">'/api'</span>: {
+        <span class="property">target</span>: <span class="string">'http://localhost:3000'</span>,
+        <span class="property">changeOrigin</span>: <span class="keyword">true</span>
+      }
+    }
+  }
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Common Loaders -->
+        <section class="section" id="loaders">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔧</span>
+              常用 Loaders
+            </h2>
+            <p class="section-subtitle">Webpack 4 处理各种文件类型的加载器</p>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Loader</th>
+                  <th>用途</th>
+                  <th>配置示例</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>ts-loader</code></td>
+                  <td>处理 TypeScript</td>
+                  <td><code>test: /\.tsx?$/</code></td>
+                </tr>
+                <tr>
+                  <td><code>babel-loader</code></td>
+                  <td>ES6+ 转译</td>
+                  <td><code>test: /\.jsx?$/</code></td>
+                </tr>
+                <tr>
+                  <td><code>css-loader</code></td>
+                  <td>处理 CSS</td>
+                  <td><code>test: /\.css$/</code></td>
+                </tr>
+                <tr>
+                  <td><code>less-loader</code></td>
+                  <td>处理 Less</td>
+                  <td><code>test: /\.less$/</code></td>
+                </tr>
+                <tr>
+                  <td><code>sass-loader</code></td>
+                  <td>处理 Sass/SCSS</td>
+                  <td><code>test: /\.scss$/</code></td>
+                </tr>
+                <tr>
+                  <td><code>style-loader</code></td>
+                  <td>注入 CSS 到 DOM</td>
+                  <td>与 css-loader 配合</td>
+                </tr>
+                <tr>
+                  <td><code>file-loader</code></td>
+                  <td>处理文件</td>
+                  <td><code>test: /\.(png|jpg|gif)$/</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>CSS Modules 配置</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">webpack.config.js - CSS Modules</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code>{
+  <span class="property">test</span>: /\.module\.css$/,
+  <span class="property">use</span>: [
+    <span class="string">'style-loader'</span>,
+    {
+      <span class="property">loader</span>: <span class="string">'css-loader'</span>,
+      <span class="property">options</span>: {
+        <span class="property">modules</span>: {
+          <span class="property">localIdentName</span>: <span class="string">'[name]__[local]--[hash:base64:5]'</span>
+        }
+      }
+    }
+  ]
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 3: Common Plugins -->
+        <section class="section" id="plugins">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔌</span>
+              常用 Plugins
+            </h2>
+            <p class="section-subtitle">Webpack 4 插件，扩展构建功能</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">📄</div>
+                <div>
+                  <h3 class="card-title">HtmlWebpackPlugin</h3>
+                </div>
+              </div>
+              <p>自动生成 HTML 文件并注入打包后的资源</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🎨</div>
+                <div>
+                  <h3 class="card-title">MiniCssExtractPlugin</h3>
+                </div>
+              </div>
+              <p>将 CSS 提取到单独的文件</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🧹</div>
+                <div>
+                  <h3 class="card-title">CleanWebpackPlugin</h3>
+                </div>
+              </div>
+              <p>构建前清理输出目录</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">📊</div>
+                <div>
+                  <h3 class="card-title">BundleAnalyzerPlugin</h3>
+                </div>
+              </div>
+              <p>分析打包体积</p>
+            </div>
+          </div>
+
+          <h3>插件配置示例</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">webpack.config.js - Plugins</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">const</span> HtmlWebpackPlugin = require(<span class="string">'html-webpack-plugin'</span>)
+<span class="keyword">const</span> MiniCssExtractPlugin = require(<span class="string">'mini-css-extract-plugin'</span>)
+<span class="keyword">const</span> { CleanWebpackPlugin } = require(<span class="string">'clean-webpack-plugin'</span>)
+<span class="keyword">const</span> { BundleAnalyzerPlugin } = require(<span class="string">'webpack-bundle-analyzer'</span>)
+
+module.exports = {
+  <span class="property">plugins</span>: [
+    <span class="comment">// 清理输出目录</span>
+    <span class="keyword">new</span> CleanWebpackPlugin(),
+
+    <span class="comment">// 生成 HTML</span>
+    <span class="keyword">new</span> HtmlWebpackPlugin({
+      <span class="property">template</span>: <span class="string">'./public/index.html'</span>,
+      <span class="property">minify</span>: {
+        <span class="property">collapseWhitespace</span>: <span class="keyword">true</span>,
+        <span class="property">removeComments</span>: <span class="keyword">true</span>
+      }
+    }),
+
+    <span class="comment">// 提取 CSS</span>
+    <span class="keyword">new</span> MiniCssExtractPlugin({
+      <span class="property">filename</span>: <span class="string">'[name].[contenthash].css'</span>
+    }),
+
+    <span class="comment">// 分析打包体积（开发时使用）</span>
+    <span class="keyword">new</span> BundleAnalyzerPlugin()
+  ]
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 4: Commands -->
+        <section class="section" id="commands">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">💻</span>
+              常用命令
+            </h2>
+            <p class="section-subtitle">Vue CLI 命令 vs Webpack 4 命令</p>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>功能</th>
+                  <th>Vue CLI</th>
+                  <th>Webpack 4</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>启动开发服务器</td>
+                  <td><code>npm run serve</code></td>
+                  <td><code>webpack-dev-server</code></td>
+                </tr>
+                <tr>
+                  <td>生产构建</td>
+                  <td><code>npm run build</code></td>
+                  <td><code>webpack --mode production</code></td>
+                </tr>
+                <tr>
+                  <td>查看配置</td>
+                  <td><code>vue inspect</code></td>
+                  <td><code>webpack --display-error-details</code></td>
+                </tr>
+                <tr>
+                  <td>分析打包</td>
+                  <td><code>npm run build -- --report</code></td>
+                  <td><code>webpack --profile --json</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>package.json 脚本配置</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">package.json</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code>{
+  <span class="property">"scripts"</span>: {
+    <span class="property">"start"</span>: <span class="string">"webpack-dev-server --mode development --open"</span>,
+    <span class="property">"build"</span>: <span class="string">"webpack --mode production"</span>,
+    <span class="property">"build:analyze"</span>: <span class="string">"ANALYZE=true webpack --mode production"</span>,
+    <span class="property">"lint"</span>: <span class="string">"eslint src/**/*.{ts,tsx}"</span>
+  }
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Navigation -->
+        <div style="display: flex; justify-content: space-between; margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--border-color);">
+          <a href="04-routing.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); text-decoration: none;">
+            ← 路由迁移
+          </a>
+          <a href="06-patterns.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--vue-primary); text-decoration: none; font-weight: 600;">
+            业务场景对照 →
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

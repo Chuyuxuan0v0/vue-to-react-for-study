@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>核心概念对比 - Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* Page-specific: Reactive Principle Diagrams */
+    .reactive-diagram {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+
+    .reactive-card {
+      position: relative;
+      padding: var(--space-6);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      overflow: hidden;
+    }
+
+    .reactive-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .reactive-card.vue-card::after {
+      background: linear-gradient(90deg, var(--vue-primary), #35495e);
+    }
+
+    .reactive-card.react-card::after {
+      background: linear-gradient(90deg, var(--react-primary), #282c34);
+    }
+
+    .reactive-card-title {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: var(--space-4);
+    }
+
+    .reactive-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .reactive-badge.vue-badge {
+      background: var(--vue-light);
+      color: var(--vue-primary);
+    }
+
+    .reactive-badge.react-badge {
+      background: var(--react-light);
+      color: var(--react-primary);
+    }
+
+    .reactive-flow {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      margin: var(--space-3) 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .reactive-flow-step {
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .reactive-flow-arrow {
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* Lifecycle Timeline */
+    .lifecycle-timeline {
+      position: relative;
+      padding-left: var(--space-8);
+      margin: var(--space-6) 0;
+    }
+
+    .lifecycle-timeline::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--vue-primary), var(--react-primary));
+      border-radius: 1px;
+    }
+
+    .lifecycle-item {
+      position: relative;
+      margin-bottom: var(--space-4);
+      padding: var(--space-4);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      transition: all var(--transition-fast);
+    }
+
+    .lifecycle-item:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .lifecycle-dot {
+      position: absolute;
+      left: calc(-1 * var(--space-8) + 6px);
+      top: var(--space-4);
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 3px solid var(--bg-secondary);
+      box-shadow: 0 0 0 2px var(--vue-primary);
+      background: var(--vue-primary);
+    }
+
+    .lifecycle-mapping {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .lifecycle-vue,
+    .lifecycle-react {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+    }
+
+    .lifecycle-vue {
+      background: var(--vue-light);
+      color: var(--vue-primary);
+    }
+
+    .lifecycle-react {
+      background: var(--react-light);
+      color: var(--react-primary);
+    }
+
+    .lifecycle-arrow {
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+
+    .lifecycle-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: var(--space-2);
+    }
+
+    /* Syntax Comparison Cards */
+    .syntax-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: var(--space-6);
+      margin: var(--space-6) 0;
+    }
+
+    .syntax-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: all var(--transition-normal);
+    }
+
+    .syntax-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .syntax-card-header {
+      padding: var(--space-4) var(--space-5);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .syntax-card-icon {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--vue-light), var(--react-light));
+      border-radius: var(--radius-sm);
+      font-size: 18px;
+    }
+
+    .syntax-card-title {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .syntax-card-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Quick Ref Pills */
+    .ref-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-2);
+      margin: var(--space-4) 0;
+    }
+
+    .ref-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-3);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      font-size: 13px;
+      transition: all var(--transition-fast);
+    }
+
+    .ref-pill:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .ref-pill code {
+      font-size: 12px;
+    }
+
+    .ref-pill-arrow {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Code tabs syntax highlighting inside code-tab-content */
+    .code-tab-content .keyword { color: #cba6f7; }
+    .code-tab-content .string { color: #a6e3a1; }
+    .code-tab-content .comment { color: #6c7086; font-style: italic; }
+    .code-tab-content .function { color: #89b4fa; }
+    .code-tab-content .number { color: #fab387; }
+    .code-tab-content .operator { color: #89dceb; }
+    .code-tab-content .class-name { color: #f9e2af; }
+    .code-tab-content .punctuation { color: #bac2de; }
+    .code-tab-content .property { color: #f38ba8; }
+    .code-tab-content .tag { color: #cba6f7; }
+    .code-tab-content .attr-name { color: #89b4fa; }
+    .code-tab-content .attr-value { color: #a6e3a1; }
+    .code-tab-content .type { color: #f9e2af; }
+    .code-tab-content .decorator { color: #fab387; }
+    .code-tab-content .parameter { color: #eba0ac; }
+    .code-tab-content .jsx-tag { color: #f38ba8; }
+    .code-tab-content .jsx-attr { color: #89b4fa; }
+
+    @media (max-width: 768px) {
+      .reactive-diagram {
+        grid-template-columns: 1fr;
+      }
+
+      .syntax-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item active">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+
+        <!-- Page Header -->
+        <header class="page-header animate-in">
+          <nav class="page-breadcrumb">
+            <a href="index.html">首页</a>
+            <span>/</span>
+            <span>核心概念对比</span>
+          </nav>
+          <h1 class="page-title">
+            <span class="gradient-text">核心概念对比</span>
+          </h1>
+          <p class="page-description">
+            从响应式原理到模板语法，逐一对比 Vue 2 与 React 的核心概念差异，建立心智模型映射。
+          </p>
+        </header>
+
+        <!-- ============================================
+             Section 1: 核心概念速查表
+             ============================================ -->
+        <section class="section animate-in animate-delay-1" id="quick-ref">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📋</span>
+              概念速查表
+            </h2>
+            <p class="section-subtitle">Vue 2 到 React 的核心概念一一映射</p>
+          </div>
+
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Vue 2 概念</th>
+                  <th>React 对应</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>data()</code> 返回响应式对象</td>
+                  <td><code>useState</code> Hook</td>
+                  <td>状态声明方式不同，Vue 是对象，React 是独立变量</td>
+                </tr>
+                <tr>
+                  <td><code>computed</code></td>
+                  <td><code>useMemo</code></td>
+                  <td>计算/派生状态，依赖变化时重新计算</td>
+                </tr>
+                <tr>
+                  <td><code>watch</code></td>
+                  <td><code>useEffect</code></td>
+                  <td>副作用监听，但 React 的 useEffect 语义更广</td>
+                </tr>
+                <tr>
+                  <td><code>methods</code></td>
+                  <td>普通函数 / <code>useCallback</code></td>
+                  <td>Vue 的 methods 挂在实例上，React 直接定义在函数体内</td>
+                </tr>
+                <tr>
+                  <td><code>mounted</code></td>
+                  <td><code>useEffect([], ...)</code></td>
+                  <td>组件挂载后执行，依赖数组传空数组</td>
+                </tr>
+                <tr>
+                  <td><code>updated</code></td>
+                  <td><code>useEffect</code> 无依赖</td>
+                  <td>每次渲染后执行，需注意避免死循环</td>
+                </tr>
+                <tr>
+                  <td><code>beforeDestroy</code></td>
+                  <td><code>useEffect</code> 返回函数</td>
+                  <td>清理函数在组件卸载前执行</td>
+                </tr>
+                <tr>
+                  <td><code>v-model</code></td>
+                  <td>受控组件 + <code>onChange</code></td>
+                  <td>Vue 双向绑定，React 需手动同步状态</td>
+                </tr>
+                <tr>
+                  <td><code>v-if</code> / <code>v-show</code></td>
+                  <td>条件渲染（<code>&&amp;&amp;</code> / 三元）</td>
+                  <td>v-if 对应条件渲染，v-show 对应 CSS display</td>
+                </tr>
+                <tr>
+                  <td><code>v-for</code></td>
+                  <td><code>array.map()</code></td>
+                  <td>列表渲染，React 需要显式指定 key</td>
+                </tr>
+                <tr>
+                  <td><code>ref</code></td>
+                  <td><code>useRef</code></td>
+                  <td>DOM 引用，React 的 useRef 也可存储任意可变值</td>
+                </tr>
+                <tr>
+                  <td><code>provide/inject</code></td>
+                  <td><code>Context</code></td>
+                  <td>跨层级通信，避免 props 逐层传递</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <div class="callout-title">迁移提示</div>
+              <p class="callout-text">
+                这张表是你的核心参考。迁移时不必一次理解全部差异，建议按模块逐步对照，先从 <code>data</code> → <code>useState</code> 开始建立直觉。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================
+             Section 2: 响应式原理对比
+             ============================================ -->
+        <section class="section" id="reactivity">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">⚡</span>
+              响应式原理对比
+            </h2>
+            <p class="section-subtitle">理解两种框架的状态追踪机制差异</p>
+          </div>
+
+          <div class="reactive-diagram">
+            <!-- Vue 2 Side -->
+            <div class="reactive-card vue-card">
+              <div class="reactive-card-title">
+                <span class="reactive-badge vue-badge">Vue 2</span>
+                Object.defineProperty
+              </div>
+              <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--space-4);">
+                Vue 2 使用 <code>Object.defineProperty</code> 递归劫持 data 对象的每个属性，在 getter 中收集依赖，在 setter 中通知更新。
+              </p>
+              <div class="reactive-flow">
+                <span class="reactive-flow-step">data: { count: 0 }</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">getter 劫持</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">收集依赖</span>
+              </div>
+              <div class="reactive-flow">
+                <span class="reactive-flow-step">this.count = 1</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">setter 触发</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">派发更新</span>
+              </div>
+              <div class="callout warning" style="margin-top: var(--space-4); margin-bottom: 0;">
+                <div class="callout-icon">⚠</div>
+                <div class="callout-content">
+                  <p class="callout-text" style="margin-bottom: 0;">
+                    无法检测新增属性（需 <code>Vue.set</code>）和数组索引修改。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- React Side -->
+            <div class="reactive-card react-card">
+              <div class="reactive-card-title">
+                <span class="reactive-badge react-badge">React</span>
+                不可变状态 + 重新渲染
+              </div>
+              <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--space-4);">
+                React 不做数据劫持。调用 <code>setState</code> 时创建新引用，触发组件重新渲染，由开发者决定何时以及如何更新。
+              </p>
+              <div class="reactive-flow">
+                <span class="reactive-flow-step">useState(0)</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">setCount(1)</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">re-render</span>
+              </div>
+              <div class="reactive-flow">
+                <span class="reactive-flow-step">setState(prev =&gt; ...)</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">浅比较新旧</span>
+                <span class="reactive-flow-arrow">→</span>
+                <span class="reactive-flow-step">调度更新</span>
+              </div>
+              <div class="callout info" style="margin-top: var(--space-4); margin-bottom: 0;">
+                <div class="callout-icon">ℹ</div>
+                <div class="callout-content">
+                  <p class="callout-text" style="margin-bottom: 0;">
+                    对象/数组必须创建新引用，否则 React 认为没有变化。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code comparison for reactivity -->
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="comment">// Vue 2 - 响应式数据自动追踪</span>
+<span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">count</span>: <span class="number">0</span>,
+      <span class="property">user</span>: { <span class="property">name</span>: <span class="string">'Alice'</span>, <span class="property">age</span>: <span class="number">25</span> }
+    }
+  },
+  <span class="function">computed</span>: {
+    <span class="comment">// 自动追踪 this.count 的变化</span>
+    <span class="function">doubleCount</span>() {
+      <span class="keyword">return</span> <span class="keyword">this</span>.count * <span class="number">2</span>
+    }
+  },
+  <span class="function">methods</span>: {
+    <span class="function">increment</span>() {
+      <span class="keyword">this</span>.count++  <span class="comment">// 自动触发视图更新</span>
+    },
+    <span class="function">addProp</span>() {
+      <span class="comment">// 无法检测！需要用 Vue.set</span>
+      <span class="keyword">this</span>.$set(<span class="keyword">this</span>.user, <span class="string">'email'</span>, <span class="string">'a@b.com'</span>)
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">import</span> { <span class="function">useState</span>, <span class="function">useMemo</span> } <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">interface</span> <span class="class-name">User</span> {
+  <span class="property">name</span>: <span class="type">string</span>
+  <span class="property">age</span>: <span class="type">number</span>
+  <span class="property">email</span><span class="operator">?</span>: <span class="type">string</span>
+}
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+  <span class="keyword">const</span> [<span class="parameter">count</span>, <span class="function">setCount</span>] = <span class="function">useState</span>&lt;<span class="type">number</span>&gt;(<span class="number">0</span>)
+  <span class="keyword">const</span> [<span class="parameter">user</span>, <span class="function">setUser</span>] = <span class="function">useState</span>&lt;<span class="class-name">User</span>&gt;({
+    <span class="property">name</span>: <span class="string">'Alice'</span>, <span class="property">age</span>: <span class="number">25</span>
+  })
+
+  <span class="comment">// 手动追踪 count 的派生值</span>
+  <span class="keyword">const</span> <span class="parameter">doubleCount</span> = <span class="function">useMemo</span>(
+    () =&gt; count * <span class="number">2</span>,
+    [count]
+  )
+
+  <span class="keyword">const</span> <span class="function">increment</span> = () =&gt; {
+    <span class="function">setCount</span>(prev =&gt; prev + <span class="number">1</span>)
+  }
+
+  <span class="keyword">const</span> <span class="function">addProp</span> = () =&gt; {
+    <span class="comment">// 创建新对象即可，无需特殊 API</span>
+    <span class="function">setUser</span>(prev =&gt; ({ ...prev, <span class="property">email</span>: <span class="string">'a@b.com'</span> }))
+  }
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================
+             Section 3: 生命周期映射
+             ============================================ -->
+        <section class="section" id="lifecycle">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔄</span>
+              生命周期映射
+            </h2>
+            <p class="section-subtitle">从 Options API 钩子到 useEffect 的思维转换</p>
+          </div>
+
+          <div class="lifecycle-timeline">
+            <div class="lifecycle-item">
+              <div class="lifecycle-dot"></div>
+              <div class="lifecycle-mapping">
+                <span class="lifecycle-vue">beforeCreate / created</span>
+                <span class="lifecycle-arrow">→</span>
+                <span class="lifecycle-react">函数体顶部</span>
+              </div>
+              <p class="lifecycle-desc">Vue 2 的这两个钩子对应 React 函数组件的"函数体本身"——组件函数执行即代表初始化。</p>
+            </div>
+
+            <div class="lifecycle-item">
+              <div class="lifecycle-dot"></div>
+              <div class="lifecycle-mapping">
+                <span class="lifecycle-vue">mounted</span>
+                <span class="lifecycle-arrow">→</span>
+                <span class="lifecycle-react">useEffect(() =&gt; { ... }, [])</span>
+              </div>
+              <p class="lifecycle-desc">组件挂载到 DOM 后执行。依赖数组传空数组，确保只在首次渲染后运行一次。</p>
+            </div>
+
+            <div class="lifecycle-item">
+              <div class="lifecycle-dot"></div>
+              <div class="lifecycle-mapping">
+                <span class="lifecycle-vue">updated</span>
+                <span class="lifecycle-arrow">→</span>
+                <span class="lifecycle-react">useEffect(() =&gt; { ... })</span>
+              </div>
+              <p class="lifecycle-desc">省略依赖数组时，每次渲染后都会执行。注意不要在其中修改状态导致死循环。</p>
+            </div>
+
+            <div class="lifecycle-item">
+              <div class="lifecycle-dot"></div>
+              <div class="lifecycle-mapping">
+                <span class="lifecycle-vue">watch: { prop }</span>
+                <span class="lifecycle-arrow">→</span>
+                <span class="lifecycle-react">useEffect(() =&gt; { ... }, [prop])</span>
+              </div>
+              <p class="lifecycle-desc">指定依赖数组可以精确监听特定值的变化，类似 Vue 的 watch 选项。</p>
+            </div>
+
+            <div class="lifecycle-item">
+              <div class="lifecycle-dot"></div>
+              <div class="lifecycle-mapping">
+                <span class="lifecycle-vue">beforeDestroy</span>
+                <span class="lifecycle-arrow">→</span>
+                <span class="lifecycle-react">useEffect 的返回函数</span>
+              </div>
+              <p class="lifecycle-desc">清理副作用。useEffect 返回的函数在组件卸载前和下次 effect 执行前调用。</p>
+            </div>
+
+            <div class="lifecycle-item">
+              <div class="lifecycle-dot"></div>
+              <div class="lifecycle-mapping">
+                <span class="lifecycle-vue">errorCaptured</span>
+                <span class="lifecycle-arrow">→</span>
+                <span class="lifecycle-react">ErrorBoundary (class component)</span>
+              </div>
+              <p class="lifecycle-desc">错误边界目前只能用 class 组件实现，用于捕获子组件的渲染错误。</p>
+            </div>
+          </div>
+
+          <!-- Lifecycle Code Example -->
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> { <span class="property">items</span>: [], <span class="property">timer</span>: <span class="keyword">null</span> }
+  },
+
+  <span class="comment">// 组件挂载后</span>
+  <span class="function">mounted</span>() {
+    <span class="keyword">this</span>.<span class="function">fetchItems</span>()
+    <span class="keyword">this</span>.timer = <span class="function">setInterval</span>(() =&gt; {
+      <span class="keyword">this</span>.<span class="function">fetchItems</span>()
+    }, <span class="number">5000</span>)
+  },
+
+  <span class="comment">// 监听特定数据变化</span>
+  <span class="property">watch</span>: {
+    <span class="function">items</span>(<span class="parameter">newVal</span>, <span class="parameter">oldVal</span>) {
+      console.<span class="function">log</span>(<span class="string">'items changed'</span>, newVal.length)
+    }
+  },
+
+  <span class="comment">// 组件销毁前清理</span>
+  <span class="function">beforeDestroy</span>() {
+    <span class="keyword">if</span> (<span class="keyword">this</span>.timer) {
+      <span class="function">clearInterval</span>(<span class="keyword">this</span>.timer)
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">import</span> { <span class="function">useState</span>, <span class="function">useEffect</span> } <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">interface</span> <span class="class-name">Item</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+  <span class="property">name</span>: <span class="type">string</span>
+}
+
+<span class="keyword">function</span> <span class="function">ItemList</span>() {
+  <span class="keyword">const</span> [<span class="parameter">items</span>, <span class="function">setItems</span>] = <span class="function">useState</span>&lt;<span class="class-name">Item</span>[]&gt;([])
+
+  <span class="comment">// mounted + beforeDestroy 合并到一个 effect</span>
+  <span class="function">useEffect</span>(() =&gt; {
+    <span class="function">fetchItems</span>()
+
+    <span class="keyword">const</span> <span class="parameter">timer</span> = <span class="function">setInterval</span>(() =&gt; {
+      <span class="function">fetchItems</span>()
+    }, <span class="number">5000</span>)
+
+    <span class="comment">// cleanup: 等价于 beforeDestroy</span>
+    <span class="keyword">return</span> () =&gt; {
+      <span class="function">clearInterval</span>(timer)
+    }
+  }, [])  <span class="comment">// 空依赖 = 只在 mount/unmount 时执行</span>
+
+  <span class="comment">// watch items 的变化</span>
+  <span class="function">useEffect</span>(() =&gt; {
+    console.<span class="function">log</span>(<span class="string">'items changed'</span>, items.length)
+  }, [items])  <span class="comment">// 依赖数组 = watch 目标</span>
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="callout warning">
+            <div class="callout-icon">⚠</div>
+            <div class="callout-content">
+              <div class="callout-title">关键区别</div>
+              <p class="callout-text">
+                Vue 的 <code>watch</code> 可以拿到旧值和新值，而 <code>useEffect</code> 只能拿到最新值。
+                如果需要旧值，需要用 <code>useRef</code> 手动保存。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================
+             Section 4: 模板语法对比
+             ============================================ -->
+        <section class="section" id="template-syntax">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📝</span>
+              模板语法对比
+            </h2>
+            <p class="section-subtitle">从 Vue 模板指令到 JSX 表达式的转换</p>
+          </div>
+
+          <div class="syntax-grid">
+
+            <!-- v-if → 条件渲染 -->
+            <div class="syntax-card">
+              <div class="syntax-card-header">
+                <div class="syntax-card-icon">🔀</div>
+                <div>
+                  <div class="syntax-card-title">条件渲染</div>
+                  <div class="syntax-card-subtitle">v-if / v-else → &amp;&amp; / 三元运算符</div>
+                </div>
+              </div>
+              <div class="code-tabs">
+                <div class="code-tabs-header">
+                  <button class="code-tab active" data-tab="vue">
+                    <span class="code-tab-dot"></span>
+                    Vue 2
+                  </button>
+                  <button class="code-tab" data-tab="react">
+                    <span class="code-tab-dot"></span>
+                    React
+                  </button>
+                </div>
+                <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="comment">&lt;!-- v-if 完全移除 DOM --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr-name">v-if</span>=<span class="attr-value">"isLoggedIn"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;p&gt;</span>欢迎回来<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr-name">v-else</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;p&gt;</span>请登录<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="comment">&lt;!-- v-show 仅切换 display --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr-name">v-show</span>=<span class="attr-value">"isVisible"</span><span class="tag">&gt;</span>
+  可见内容
+<span class="tag">&lt;/div&gt;</span></code></pre>
+                </div>
+                <div class="code-tab-content" data-tab="react">
+<pre><code><span class="comment">// &amp;&amp; 短路 —— 适合"有或无"</span>
+{isLoggedIn <span class="operator">&amp;&amp;</span> <span class="tag">&lt;p&gt;</span>欢迎回来<span class="tag">&lt;/p&gt;</span>}
+
+<span class="comment">// 三元 —— 适合"二选一"</span>
+{isLoggedIn
+  ? <span class="tag">&lt;p&gt;</span>欢迎回来<span class="tag">&lt;/p&gt;</span>
+  : <span class="tag">&lt;p&gt;</span>请登录<span class="tag">&lt;/p&gt;</span>
+}
+
+<span class="comment">// v-show 等价：CSS 控制</span>
+<span class="tag">&lt;div</span> <span class="jsx-attr">style</span>={{ <span class="property">display</span>: isVisible ? <span class="string">'block'</span> : <span class="string">'none'</span> }}<span class="tag">&gt;</span>
+  可见内容
+<span class="tag">&lt;/div&gt;</span></code></pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- v-for → map -->
+            <div class="syntax-card">
+              <div class="syntax-card-header">
+                <div class="syntax-card-icon">🔁</div>
+                <div>
+                  <div class="syntax-card-title">列表渲染</div>
+                  <div class="syntax-card-subtitle">v-for → Array.map()</div>
+                </div>
+              </div>
+              <div class="code-tabs">
+                <div class="code-tabs-header">
+                  <button class="code-tab active" data-tab="vue">
+                    <span class="code-tab-dot"></span>
+                    Vue 2
+                  </button>
+                  <button class="code-tab" data-tab="react">
+                    <span class="code-tab-dot"></span>
+                    React
+                  </button>
+                </div>
+                <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="comment">&lt;!-- 基础列表 --&gt;</span>
+<span class="tag">&lt;ul&gt;</span>
+  <span class="tag">&lt;li</span>
+    <span class="attr-name">v-for</span>=<span class="attr-value">"(item, index) in items"</span>
+    <span class="attr-name">:key</span>=<span class="attr-value">"item.id"</span>
+  <span class="tag">&gt;</span>
+    {{ index + 1 }}. {{ item.name }}
+  <span class="tag">&lt;/li&gt;</span>
+<span class="tag">&lt;/ul&gt;</span>
+
+<span class="comment">&lt;!-- 遍历对象 --&gt;</span>
+<span class="tag">&lt;div</span>
+  <span class="attr-name">v-for</span>=<span class="attr-value">"(value, key) in user"</span>
+  <span class="attr-name">:key</span>=<span class="attr-value">"key"</span>
+<span class="tag">&gt;</span>
+  {{ key }}: {{ value }}
+<span class="tag">&lt;/div&gt;</span></code></pre>
+                </div>
+                <div class="code-tab-content" data-tab="react">
+<pre><code><span class="comment">// 基础列表</span>
+<span class="tag">&lt;ul&gt;</span>
+  {items.<span class="function">map</span>((item, index) =&gt; (
+    <span class="tag">&lt;li</span> <span class="jsx-attr">key</span>={item.id}<span class="tag">&gt;</span>
+      {index + <span class="number">1</span>}. {item.name}
+    <span class="tag">&lt;/li&gt;</span>
+  ))}
+<span class="tag">&lt;/ul&gt;</span>
+
+<span class="comment">// 遍历对象</span>
+{Object.<span class="function">entries</span>(user).<span class="function">map</span>(
+  ([key, value]) =&gt; (
+    <span class="tag">&lt;div</span> <span class="jsx-attr">key</span>={key}<span class="tag">&gt;</span>
+      {key}: {value}
+    <span class="tag">&lt;/div&gt;</span>
+  )
+)}</code></pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- v-model → 受控组件 -->
+            <div class="syntax-card">
+              <div class="syntax-card-header">
+                <div class="syntax-card-icon">🔗</div>
+                <div>
+                  <div class="syntax-card-title">双向绑定</div>
+                  <div class="syntax-card-subtitle">v-model → 受控组件 + onChange</div>
+                </div>
+              </div>
+              <div class="code-tabs">
+                <div class="code-tabs-header">
+                  <button class="code-tab active" data-tab="vue">
+                    <span class="code-tab-dot"></span>
+                    Vue 2
+                  </button>
+                  <button class="code-tab" data-tab="react">
+                    <span class="code-tab-dot"></span>
+                    React
+                  </button>
+                </div>
+                <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;form</span> <span class="attr-name">@submit.prevent</span>=<span class="attr-value">"onSubmit"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;input</span>
+      <span class="attr-name">v-model</span>=<span class="attr-value">"form.name"</span>
+      <span class="attr-name">placeholder</span>=<span class="attr-value">"姓名"</span>
+    <span class="tag">/&gt;</span>
+    <span class="tag">&lt;select</span> <span class="attr-name">v-model</span>=<span class="attr-value">"form.role"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr-name">value</span>=<span class="attr-value">"admin"</span><span class="tag">&gt;</span>管理员<span class="tag">&lt;/option&gt;</span>
+      <span class="tag">&lt;option</span> <span class="attr-name">value</span>=<span class="attr-value">"user"</span><span class="tag">&gt;</span>用户<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;/select&gt;</span>
+    <span class="tag">&lt;input</span>
+      <span class="attr-name">type</span>=<span class="attr-value">"checkbox"</span>
+      <span class="attr-name">v-model</span>=<span class="attr-value">"form.agree"</span>
+    <span class="tag">/&gt;</span>
+  <span class="tag">&lt;/form&gt;</span>
+<span class="tag">&lt;/template&gt;</span></code></pre>
+                </div>
+                <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">const</span> [<span class="parameter">form</span>, <span class="function">setForm</span>] = <span class="function">useState</span>({
+  <span class="property">name</span>: <span class="string">''</span>,
+  <span class="property">role</span>: <span class="string">'admin'</span>,
+  <span class="property">agree</span>: <span class="keyword">false</span>,
+})
+
+<span class="keyword">const</span> <span class="function">handleChange</span> = (
+  <span class="parameter">e</span>: React.ChangeEvent&lt;
+    HTMLInputElement <span class="operator">|</span> HTMLSelectElement
+  &gt;
+) =&gt; {
+  <span class="keyword">const</span> { <span class="parameter">name</span>, <span class="parameter">value</span>, <span class="parameter">type</span> } = e.target
+  <span class="function">setForm</span>(prev =&gt; ({
+    ...prev,
+    [name]: type === <span class="string">'checkbox'</span>
+      ? (e.target <span class="keyword">as</span> HTMLInputElement).checked
+      : value
+  }))
+}
+
+<span class="tag">&lt;form</span> <span class="jsx-attr">onSubmit</span>={onSubmit}<span class="tag">&gt;</span>
+  <span class="tag">&lt;input</span>
+    <span class="jsx-attr">name</span>=<span class="string">"name"</span>
+    <span class="jsx-attr">value</span>={form.name}
+    <span class="jsx-attr">onChange</span>={handleChange}
+  <span class="tag">/&gt;</span>
+  <span class="tag">&lt;select</span>
+    <span class="jsx-attr">name</span>=<span class="string">"role"</span>
+    <span class="jsx-attr">value</span>={form.role}
+    <span class="jsx-attr">onChange</span>={handleChange}
+  <span class="tag">&gt;</span>
+    <span class="tag">&lt;option</span> <span class="jsx-attr">value</span>=<span class="string">"admin"</span><span class="tag">&gt;</span>管理员<span class="tag">&lt;/option&gt;</span>
+    <span class="tag">&lt;option</span> <span class="jsx-attr">value</span>=<span class="string">"user"</span><span class="tag">&gt;</span>用户<span class="tag">&lt;/option&gt;</span>
+  <span class="tag">&lt;/select&gt;</span>
+  <span class="tag">&lt;input</span>
+    <span class="jsx-attr">type</span>=<span class="string">"checkbox"</span>
+    <span class="jsx-attr">name</span>=<span class="string">"agree"</span>
+    <span class="jsx-attr">checked</span>={form.agree}
+    <span class="jsx-attr">onChange</span>={handleChange}
+  <span class="tag">/&gt;</span>
+<span class="tag">&lt;/form&gt;</span></code></pre>
+                </div>
+              </div>
+            </div>
+
+            <!-- computed → useMemo -->
+            <div class="syntax-card">
+              <div class="syntax-card-header">
+                <div class="syntax-card-icon">🧮</div>
+                <div>
+                  <div class="syntax-card-title">计算属性</div>
+                  <div class="syntax-card-subtitle">computed → useMemo</div>
+                </div>
+              </div>
+              <div class="code-tabs">
+                <div class="code-tabs-header">
+                  <button class="code-tab active" data-tab="vue">
+                    <span class="code-tab-dot"></span>
+                    Vue 2
+                  </button>
+                  <button class="code-tab" data-tab="react">
+                    <span class="code-tab-dot"></span>
+                    React
+                  </button>
+                </div>
+                <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">price</span>: <span class="number">100</span>,
+      <span class="property">quantity</span>: <span class="number">3</span>,
+      <span class="property">discount</span>: <span class="number">0.8</span>
+    }
+  },
+  <span class="function">computed</span>: {
+    <span class="comment">// 自动缓存，依赖不变则不重算</span>
+    <span class="function">total</span>() {
+      <span class="keyword">return</span> <span class="keyword">this</span>.price
+        * <span class="keyword">this</span>.quantity
+        * <span class="keyword">this</span>.discount
+    },
+    <span class="function">formattedTotal</span>() {
+      <span class="keyword">return</span> <span class="string">`¥${this.total.toFixed(2)}`</span>
+    }
+  }
+}</code></pre>
+                </div>
+                <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">function</span> <span class="function">Cart</span>() {
+  <span class="keyword">const</span> [<span class="parameter">price</span>] = <span class="function">useState</span>(<span class="number">100</span>)
+  <span class="keyword">const</span> [<span class="parameter">quantity</span>] = <span class="function">useState</span>(<span class="number">3</span>)
+  <span class="keyword">const</span> [<span class="parameter">discount</span>] = <span class="function">useState</span>(<span class="number">0.8</span>)
+
+  <span class="comment">// 依赖不变时返回缓存值</span>
+  <span class="keyword">const</span> <span class="parameter">total</span> = <span class="function">useMemo</span>(
+    () =&gt; price * quantity * discount,
+    [price, quantity, discount]
+  )
+
+  <span class="comment">// 链式派生</span>
+  <span class="keyword">const</span> <span class="parameter">formattedTotal</span> = <span class="function">useMemo</span>(
+    () =&gt; <span class="string">`¥${total.toFixed(2)}`</span>,
+    [total]
+  )
+}</code></pre>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ============================================
+             Section 5: 完整组件对比
+             ============================================ -->
+        <section class="section" id="full-component">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📦</span>
+              完整组件对比
+            </h2>
+            <p class="section-subtitle">一个真实场景：带搜索、过滤、计数器的用户列表</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2 完整组件
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr-name">class</span>=<span class="attr-value">"user-list"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h2&gt;</span>用户列表 ({{ filteredCount }})<span class="tag">&lt;/h2&gt;</span>
+
+    <span class="comment">&lt;!-- 搜索框：v-model 双向绑定 --&gt;</span>
+    <span class="tag">&lt;input</span>
+      <span class="attr-name">v-model</span>=<span class="attr-value">"search"</span>
+      <span class="attr-name">placeholder</span>=<span class="attr-value">"搜索用户..."</span>
+    <span class="tag">/&gt;</span>
+
+    <span class="comment">&lt;!-- 条件渲染：加载状态 --&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr-name">v-if</span>=<span class="attr-value">"loading"</span><span class="tag">&gt;</span>加载中...<span class="tag">&lt;/div&gt;</span>
+
+    <span class="comment">&lt;!-- 列表渲染 --&gt;</span>
+    <span class="tag">&lt;ul</span> <span class="attr-name">v-else</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;li</span>
+        <span class="attr-name">v-for</span>=<span class="attr-value">"user in filteredUsers"</span>
+        <span class="attr-name">:key</span>=<span class="attr-value">"user.id"</span>
+        <span class="attr-name">@click</span>=<span class="attr-value">"selectUser(user)"</span>
+      <span class="tag">&gt;</span>
+        {{ user.name }}
+      <span class="tag">&lt;/li&gt;</span>
+    <span class="tag">&lt;/ul&gt;</span>
+
+    <span class="comment">&lt;!-- 选中用户详情 --&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr-name">v-if</span>=<span class="attr-value">"selectedUser"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;p&gt;</span>选中: {{ selectedUser.name }}<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">users</span>: [],
+      <span class="property">search</span>: <span class="string">''</span>,
+      <span class="property">loading</span>: <span class="keyword">false</span>,
+      <span class="property">selectedUser</span>: <span class="keyword">null</span>,
+    }
+  },
+  <span class="function">computed</span>: {
+    <span class="function">filteredUsers</span>() {
+      <span class="keyword">return</span> <span class="keyword">this</span>.users.<span class="function">filter</span>(u =&gt;
+        u.name.<span class="function">toLowerCase</span>()
+          .<span class="function">includes</span>(<span class="keyword">this</span>.search.<span class="function">toLowerCase</span>())
+      )
+    },
+    <span class="function">filteredCount</span>() {
+      <span class="keyword">return</span> <span class="keyword">this</span>.filteredUsers.length
+    }
+  },
+  <span class="function">mounted</span>() {
+    <span class="keyword">this</span>.<span class="function">fetchUsers</span>()
+  },
+  <span class="function">methods</span>: {
+    <span class="keyword">async</span> <span class="function">fetchUsers</span>() {
+      <span class="keyword">this</span>.loading = <span class="keyword">true</span>
+      <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/users'</span>)
+      <span class="keyword">this</span>.users = <span class="keyword">await</span> res.<span class="function">json</span>()
+      <span class="keyword">this</span>.loading = <span class="keyword">false</span>
+    },
+    <span class="function">selectUser</span>(<span class="parameter">user</span>) {
+      <span class="keyword">this</span>.selectedUser = user
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">import</span> React, {
+  <span class="function">useState</span>, <span class="function">useEffect</span>, <span class="function">useMemo</span>, <span class="function">useCallback</span>
+} <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">interface</span> <span class="class-name">User</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+  <span class="property">name</span>: <span class="type">string</span>
+}
+
+<span class="keyword">const</span> <span class="function">UserList</span>: React.FC = () =&gt; {
+  <span class="keyword">const</span> [<span class="parameter">users</span>, <span class="function">setUsers</span>] = <span class="function">useState</span>&lt;<span class="class-name">User</span>[]&gt;([])
+  <span class="keyword">const</span> [<span class="parameter">search</span>, <span class="function">setSearch</span>] = <span class="function">useState</span>(<span class="string">''</span>)
+  <span class="keyword">const</span> [<span class="parameter">loading</span>, <span class="function">setLoading</span>] = <span class="function">useState</span>(<span class="keyword">false</span>)
+  <span class="keyword">const</span> [<span class="parameter">selectedUser</span>, <span class="function">setSelectedUser</span>] =
+    <span class="function">useState</span>&lt;<span class="class-name">User</span> <span class="operator">|</span> <span class="keyword">null</span>&gt;(<span class="keyword">null</span>)
+
+  <span class="comment">// computed: filteredUsers</span>
+  <span class="keyword">const</span> <span class="parameter">filteredUsers</span> = <span class="function">useMemo</span>(() =&gt; {
+    <span class="keyword">return</span> users.<span class="function">filter</span>(u =&gt;
+      u.name.<span class="function">toLowerCase</span>()
+        .<span class="function">includes</span>(search.<span class="function">toLowerCase</span>())
+    )
+  }, [users, search])
+
+  <span class="comment">// computed: filteredCount（直接用派生值）</span>
+  <span class="keyword">const</span> <span class="parameter">filteredCount</span> = filteredUsers.length
+
+  <span class="comment">// mounted: 获取数据</span>
+  <span class="function">useEffect</span>(() =&gt; {
+    <span class="keyword">const</span> <span class="function">fetchUsers</span> = <span class="keyword">async</span> () =&gt; {
+      <span class="function">setLoading</span>(<span class="keyword">true</span>)
+      <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="function">fetch</span>(<span class="string">'/api/users'</span>)
+      <span class="keyword">const</span> data = <span class="keyword">await</span> res.<span class="function">json</span>()
+      <span class="function">setUsers</span>(data)
+      <span class="function">setLoading</span>(<span class="keyword">false</span>)
+    }
+    <span class="function">fetchUsers</span>()
+  }, [])
+
+  <span class="comment">// methods: 用 useCallback 缓存</span>
+  <span class="keyword">const</span> <span class="function">selectUser</span> = <span class="function">useCallback</span>(
+    (<span class="parameter">user</span>: <span class="class-name">User</span>) =&gt; <span class="function">setSelectedUser</span>(user),
+    []
+  )
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div</span> <span class="jsx-attr">className</span>=<span class="string">"user-list"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;h2&gt;</span>用户列表 ({filteredCount})<span class="tag">&lt;/h2&gt;</span>
+
+      <span class="tag">&lt;input</span>
+        <span class="jsx-attr">value</span>={search}
+        <span class="jsx-attr">onChange</span>={e =&gt; <span class="function">setSearch</span>(e.target.value)}
+        <span class="jsx-attr">placeholder</span>=<span class="string">"搜索用户..."</span>
+      <span class="tag">/&gt;</span>
+
+      {loading ? (
+        <span class="tag">&lt;div&gt;</span>加载中...<span class="tag">&lt;/div&gt;</span>
+      ) : (
+        <span class="tag">&lt;ul&gt;</span>
+          {filteredUsers.<span class="function">map</span>(user =&gt; (
+            <span class="tag">&lt;li</span>
+              <span class="jsx-attr">key</span>={user.id}
+              <span class="jsx-attr">onClick</span>={() =&gt; <span class="function">selectUser</span>(user)}
+            <span class="tag">&gt;</span>
+              {user.name}
+            <span class="tag">&lt;/li&gt;</span>
+          ))}
+        <span class="tag">&lt;/ul&gt;</span>
+      )}
+
+      {selectedUser <span class="operator">&amp;&amp;</span> (
+        <span class="tag">&lt;div&gt;</span>
+          <span class="tag">&lt;p&gt;</span>选中: {selectedUser.name}<span class="tag">&lt;/p&gt;</span>
+        <span class="tag">&lt;/div&gt;</span>
+      )}
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="keyword">export default</span> UserList</code></pre>
+            </div>
+          </div>
+
+          <div class="callout tip">
+            <div class="callout-icon">💡</div>
+            <div class="callout-content">
+              <div class="callout-title">迁移要点</div>
+              <p class="callout-text">
+                注意对比中的模式：Vue 的 <code>computed</code> 自动缓存 vs React 的 <code>useMemo</code> 需手动声明依赖；
+                Vue 的 <code>methods</code> 不需要缓存 vs React 的函数每次渲染都重新创建（可用 <code>useCallback</code> 优化）。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================
+             Section 6: Hooks 速查
+             ============================================ -->
+        <section class="section" id="hooks">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🪝</span>
+              React Hooks 速查
+            </h2>
+            <p class="section-subtitle">迁移时最常用的 Hooks 及其 Vue 对应关系</p>
+          </div>
+
+          <div class="ref-pills">
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useState</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>data()</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useEffect</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>mounted / watch / beforeDestroy</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useMemo</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>computed</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useCallback</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>methods (缓存版)</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useRef</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>ref / this.$refs</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useContext</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>provide / inject</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useReducer</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>Vuex (局部)</code>
+            </span>
+            <span class="ref-pill">
+              <code style="color: var(--react-primary)">useLayoutEffect</code>
+              <span class="ref-pill-arrow">←</span>
+              <code>updated (同步)</code>
+            </span>
+          </div>
+
+          <!-- ref / $refs code example -->
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2 - ref / $refs
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React - useRef
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;input</span> <span class="attr-name">ref</span>=<span class="attr-value">"myInput"</span> <span class="tag">/&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr-name">@click</span>=<span class="attr-value">"focusInput"</span><span class="tag">&gt;</span>
+    聚焦
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">mounted</span>() {
+    <span class="comment">// 挂载后自动聚焦</span>
+    <span class="keyword">this</span>.$refs.myInput.<span class="function">focus</span>()
+  },
+  <span class="function">methods</span>: {
+    <span class="function">focusInput</span>() {
+      <span class="keyword">this</span>.$refs.myInput.<span class="function">focus</span>()
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">import</span> { <span class="function">useRef</span>, <span class="function">useEffect</span> } <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="keyword">function</span> <span class="function">FocusInput</span>() {
+  <span class="keyword">const</span> <span class="parameter">inputRef</span> = <span class="function">useRef</span>&lt;HTMLInputElement&gt;(<span class="keyword">null</span>)
+
+  <span class="comment">// mounted: 自动聚焦</span>
+  <span class="function">useEffect</span>(() =&gt; {
+    inputRef.current<span class="operator">?!</span>.<span class="function">focus</span>()
+  }, [])
+
+  <span class="keyword">const</span> <span class="function">focusInput</span> = () =&gt; {
+    inputRef.current<span class="operator">?!</span>.<span class="function">focus</span>()
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;&gt;</span>
+      <span class="tag">&lt;input</span> <span class="jsx-attr">ref</span>={inputRef} <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> <span class="jsx-attr">onClick</span>={focusInput}<span class="tag">&gt;</span>
+        聚焦
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+
+          <!-- provide/inject → Context -->
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2 - provide / inject
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React - Context
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+<pre><code><span class="comment">// 祖先组件：提供数据</span>
+<span class="keyword">export default</span> {
+  <span class="function">provide</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">theme</span>: <span class="keyword">this</span>.theme,
+      <span class="function">updateTheme</span>: <span class="keyword">this</span>.updateTheme
+    }
+  },
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> { <span class="property">theme</span>: <span class="string">'light'</span> }
+  },
+  <span class="function">methods</span>: {
+    <span class="function">updateTheme</span>(<span class="parameter">val</span>) {
+      <span class="keyword">this</span>.theme = val
+    }
+  }
+}
+
+<span class="comment">// 后代组件：注入数据</span>
+<span class="keyword">export default</span> {
+  <span class="function">inject</span>: [<span class="string">'theme'</span>, <span class="string">'updateTheme'</span>],
+  <span class="function">template</span>: <span class="string">`
+    &lt;div :class="theme"&gt;
+      &lt;button @click="updateTheme('dark')"&gt;
+        切换主题
+      &lt;/button&gt;
+    &lt;/div&gt;
+  `</span>
+}</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+<pre><code><span class="keyword">import</span> React, {
+  <span class="function">createContext</span>, <span class="function">useContext</span>, <span class="function">useState</span>
+} <span class="keyword">from</span> <span class="string">'react'</span>
+
+<span class="comment">// 1. 创建 Context</span>
+<span class="keyword">interface</span> <span class="class-name">ThemeContextType</span> {
+  <span class="property">theme</span>: <span class="type">string</span>
+  <span class="function">updateTheme</span>: (<span class="parameter">val</span>: <span class="type">string</span>) =&gt; <span class="type">void</span>
+}
+
+<span class="keyword">const</span> <span class="class-name">ThemeContext</span> = <span class="function">createContext</span>&lt;
+  <span class="class-name">ThemeContextType</span>
+&gt;({ <span class="property">theme</span>: <span class="string">'light'</span>, <span class="function">updateTheme</span>: () =&gt; {} })
+
+<span class="comment">// 2. 祖先组件：Provider</span>
+<span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">const</span> [<span class="parameter">theme</span>, <span class="function">setTheme</span>] = <span class="function">useState</span>(<span class="string">'light'</span>)
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;ThemeContext.Provider</span>
+      <span class="jsx-attr">value</span>={{ theme, <span class="property">updateTheme</span>: setTheme }}
+    <span class="tag">&gt;</span>
+      <span class="tag">&lt;Child /&gt;</span>
+    <span class="tag">&lt;/ThemeContext.Provider&gt;</span>
+  )
+}
+
+<span class="comment">// 3. 后代组件：useContext</span>
+<span class="keyword">function</span> <span class="function">Child</span>() {
+  <span class="keyword">const</span> { <span class="parameter">theme</span>, <span class="parameter">updateTheme</span> } =
+    <span class="function">useContext</span>(<span class="class-name">ThemeContext</span>)
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div</span> <span class="jsx-attr">className</span>={theme}<span class="tag">&gt;</span>
+      <span class="tag">&lt;button</span>
+        <span class="jsx-attr">onClick</span>={() =&gt; <span class="function">updateTheme</span>(<span class="string">'dark'</span>)}
+      <span class="tag">&gt;</span>
+        切换主题
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================
+             Section 7: 心智模型总结
+             ============================================ -->
+        <section class="section" id="mental-model">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🧠</span>
+              心智模型转换
+            </h2>
+            <p class="section-subtitle">迁移时需要牢记的核心思维差异</p>
+          </div>
+
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🟢</div>
+                <div>
+                  <div class="card-title" style="color: var(--vue-primary);">Vue 2 思维</div>
+                  <div class="card-badge">响应式代理</div>
+                </div>
+              </div>
+              <ul style="font-size: 14px; color: var(--text-secondary); list-style: none; padding: 0;">
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">修改数据即触发视图更新</li>
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">模板是声明式的 HTML 扩展</li>
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">单文件组件 (.vue) 三段式结构</li>
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">Options API 组织代码</li>
+                <li style="padding: var(--space-2) 0;">框架管理副作用的生命周期</li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-icon">🔵</div>
+                <div>
+                  <div class="card-title" style="color: var(--react-primary);">React 思维</div>
+                  <div class="card-badge">不可变数据</div>
+                </div>
+              </div>
+              <ul style="font-size: 14px; color: var(--text-secondary); list-style: none; padding: 0;">
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">状态不可变，必须通过 setter 更新</li>
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">JSX 是 JavaScript 的语法扩展</li>
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">一个函数即一个组件</li>
+                <li style="padding: var(--space-2) 0; border-bottom: 1px solid var(--border-color);">Hooks 逻辑复用更灵活</li>
+                <li style="padding: var(--space-2) 0;">开发者显式管理副作用依赖</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="callout info" style="margin-top: var(--space-6);">
+            <div class="callout-icon">ℹ</div>
+            <div class="callout-content">
+              <div class="callout-title">记住这一点</div>
+              <p class="callout-text">
+                Vue 帮你做了很多（响应式追踪、依赖收集、自动更新），而 React 把控制权交给你。
+                这意味着 React 的心智负担更集中在"何时重新执行"上，
+                但换来了更可预测的数据流和更好的可调试性。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Navigation Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-top: var(--space-8); border-top: 1px solid var(--border-color); margin-top: var(--space-12);">
+          <a href="index.html" style="display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--text-muted); font-size: 14px; font-weight: 500; transition: color var(--transition-fast);">
+            ← 返回概览
+          </a>
+          <a href="02-component.html" style="display: flex; align-items: center; gap: var(--space-2); text-decoration: none; color: var(--vue-primary); font-size: 14px; font-weight: 600; transition: color var(--transition-fast);">
+            下一章：组件开发迁移 →
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

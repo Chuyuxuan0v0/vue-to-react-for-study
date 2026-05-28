@@ -1,0 +1,989 @@
+/* ============================================
+   Vue to React Migration Guide - Design System
+   ============================================ */
+
+/* CSS Variables - Design Tokens */
+:root {
+  /* Colors - Vue Green + React Blue Palette */
+  --vue-primary: #42b883;
+  --vue-dark: #35495e;
+  --vue-light: #e8f5ef;
+  --react-primary: #61dafb;
+  --react-dark: #282c34;
+  --react-light: #e6f7ff;
+
+  /* Neutral Colors */
+  --bg-primary: #fafbfc;
+  --bg-secondary: #ffffff;
+  --bg-code: #1e1e2e;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e0;
+
+  /* Accent Colors */
+  --accent-yellow: #fbbf24;
+  --accent-red: #ef4444;
+  --accent-green: #10b981;
+  --accent-purple: #8b5cf6;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+  --shadow-xl: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Layout */
+  --sidebar-width: 280px;
+  --content-max-width: 900px;
+  --header-height: 64px;
+}
+
+/* Reset & Base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  line-height: 1.7;
+  min-height: 100vh;
+}
+
+/* ============================================
+   Layout Structure
+   ============================================ */
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform var(--transition-normal);
+}
+
+.sidebar-header {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.sidebar-logo-icon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, var(--vue-primary), var(--react-primary));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: white;
+}
+
+.sidebar-logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.sidebar-logo-text small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* Navigation Menu */
+.nav-menu {
+  padding: var(--space-4);
+}
+
+.nav-section {
+  margin-bottom: var(--space-4);
+}
+
+.nav-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.nav-item:hover {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(66, 184, 131, 0.1), rgba(97, 218, 251, 0.1));
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: linear-gradient(to bottom, var(--vue-primary), var(--react-primary));
+  border-radius: 0 3px 3px 0;
+}
+
+.nav-item-number {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.nav-item.active .nav-item-number {
+  background: linear-gradient(135deg, var(--vue-primary), var(--react-primary));
+  color: white;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  min-width: 0;
+}
+
+.content-wrapper {
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-10);
+}
+
+/* Mobile Menu Toggle */
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 200;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  margin: 3px 0;
+  transition: all var(--transition-fast);
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+.page-header {
+  margin-bottom: var(--space-10);
+  padding-bottom: var(--space-8);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.page-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-4);
+}
+
+.page-breadcrumb a {
+  color: var(--text-muted);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.page-breadcrumb a:hover {
+  color: var(--vue-primary);
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-4);
+}
+
+.page-title .gradient-text {
+  background: linear-gradient(135deg, var(--vue-primary), var(--react-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.page-description {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+}
+
+/* Section Headers */
+.section {
+  margin-bottom: var(--space-12);
+}
+
+.section-anchor {
+  scroll-margin-top: var(--space-8);
+}
+
+.section-header {
+  margin-bottom: var(--space-6);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.section-title-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vue-light);
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+/* Headings */
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: var(--space-8);
+  margin-bottom: var(--space-4);
+}
+
+h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+p {
+  margin-bottom: var(--space-4);
+}
+
+/* ============================================
+   Cards & Containers
+   ============================================ */
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: all var(--transition-normal);
+}
+
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--vue-light), var(--react-light));
+  border-radius: var(--radius-md);
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  background: var(--vue-light);
+  color: var(--vue-primary);
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: var(--space-1);
+}
+
+/* Grid Layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-6);
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+/* ============================================
+   Comparison Tables
+   ============================================ */
+
+.comparison-table-wrapper {
+  overflow-x: auto;
+  margin: var(--space-6) 0;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.comparison-table th {
+  background: linear-gradient(135deg, var(--vue-dark), #2c3e50);
+  color: white;
+  padding: var(--space-4) var(--space-5);
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.comparison-table th:first-child {
+  width: 200px;
+}
+
+.comparison-table td {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-color);
+  vertical-align: top;
+}
+
+.comparison-table tr:last-child td {
+  border-bottom: none;
+}
+
+.comparison-table tr:hover td {
+  background: var(--bg-primary);
+}
+
+.comparison-table code {
+  background: var(--bg-primary);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent-purple);
+}
+
+/* ============================================
+   Code Blocks
+   ============================================ */
+
+.code-block-wrapper {
+  margin: var(--space-6) 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: #181825;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-block-dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.code-block-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.code-block-dot:nth-child(1) { background: #f38ba8; }
+.code-block-dot:nth-child(2) { background: #f9e2af; }
+.code-block-dot:nth-child(3) { background: #a6e3a1; }
+
+.code-block-title {
+  font-size: 12px;
+  color: #6c7086;
+  font-family: var(--font-mono);
+}
+
+.code-block-copy {
+  padding: var(--space-1) var(--space-3);
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #cdd6f4;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: var(--font-sans);
+}
+
+.code-block-copy:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.code-block-copy.copied {
+  background: var(--accent-green);
+  color: white;
+}
+
+.code-block {
+  background: var(--bg-code);
+  padding: var(--space-5);
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cdd6f4;
+  tab-size: 2;
+}
+
+.code-block code {
+  font-family: inherit;
+}
+
+/* Inline Code */
+:not(pre) > code {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--accent-purple);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* ============================================
+   Code Tabs (Vue vs React)
+   ============================================ */
+
+.code-tabs {
+  margin: var(--space-6) 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.code-tabs-header {
+  display: flex;
+  background: #181825;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.code-tab {
+  flex: 1;
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  color: #6c7086;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-family: var(--font-sans);
+}
+
+.code-tab:hover {
+  color: #cdd6f4;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.code-tab.active {
+  color: #cdd6f4;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.code-tab-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.code-tab[data-tab="vue"] .code-tab-dot { background: var(--vue-primary); }
+.code-tab[data-tab="react"] .code-tab-dot { background: var(--react-primary); }
+
+.code-tab.active[data-tab="vue"] {
+  background: rgba(66, 184, 131, 0.1);
+  color: var(--vue-primary);
+}
+
+.code-tab.active[data-tab="react"] {
+  background: rgba(97, 218, 251, 0.1);
+  color: var(--react-primary);
+}
+
+.code-tab-content {
+  display: none;
+  background: var(--bg-code);
+  padding: var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cdd6f4;
+  overflow-x: auto;
+}
+
+.code-tab-content.active {
+  display: block;
+}
+
+/* ============================================
+   Info Boxes & Callouts
+   ============================================ */
+
+.callout {
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  margin: var(--space-6) 0;
+  display: flex;
+  gap: var(--space-4);
+}
+
+.callout-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.callout-content {
+  flex: 1;
+}
+
+.callout-title {
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.callout-text {
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.callout.info {
+  background: var(--react-light);
+  border: 1px solid rgba(97, 218, 251, 0.3);
+}
+
+.callout.info .callout-icon { color: var(--react-primary); }
+
+.callout.tip {
+  background: var(--vue-light);
+  border: 1px solid rgba(66, 184, 131, 0.3);
+}
+
+.callout.tip .callout-icon { color: var(--vue-primary); }
+
+.callout.warning {
+  background: #fef3c7;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.callout.warning .callout-icon { color: var(--accent-yellow); }
+
+.callout.danger {
+  background: #fee2e2;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.callout.danger .callout-icon { color: var(--accent-red); }
+
+/* ============================================
+   Concept Cards (for mappings)
+   ============================================ */
+
+.concept-mapping {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  transition: all var(--transition-fast);
+}
+
+.concept-mapping:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-sm);
+}
+
+.concept-vue,
+.concept-react {
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.concept-vue {
+  background: var(--vue-light);
+  border-left: 3px solid var(--vue-primary);
+}
+
+.concept-react {
+  background: var(--react-light);
+  border-left: 3px solid var(--react-primary);
+}
+
+.concept-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--space-1);
+}
+
+.concept-vue .concept-label { color: var(--vue-primary); }
+.concept-react .concept-label { color: var(--react-primary); }
+
+.concept-code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.concept-arrow {
+  font-size: 20px;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   Sidebar Table of Contents (In-page)
+   ============================================ */
+
+.toc-sidebar {
+  position: fixed;
+  right: var(--space-8);
+  top: var(--header-height);
+  width: 200px;
+  padding: var(--space-4);
+  max-height: calc(100vh - var(--header-height));
+  overflow-y: auto;
+}
+
+.toc-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+.toc-list {
+  list-style: none;
+}
+
+.toc-item {
+  margin-bottom: var(--space-1);
+}
+
+.toc-link {
+  display: block;
+  padding: var(--space-1) var(--space-2);
+  font-size: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.toc-link:hover {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+}
+
+.toc-link.active {
+  color: var(--vue-primary);
+  background: var(--vue-light);
+  font-weight: 500;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 1280px) {
+  .toc-sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .content-wrapper {
+    padding: var(--space-6) var(--space-4);
+    padding-top: calc(var(--header-height) + var(--space-4));
+  }
+
+  .page-title {
+    font-size: 2rem;
+  }
+
+  .grid-2,
+  .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .comparison-table-wrapper {
+    margin: var(--space-4) calc(-1 * var(--space-4));
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .code-block-wrapper {
+    margin: var(--space-4) calc(-1 * var(--space-4));
+    border-radius: 0;
+  }
+
+  .code-tabs {
+    margin: var(--space-4) calc(-1 * var(--space-4));
+    border-radius: 0;
+  }
+
+  .concept-mapping {
+    grid-template-columns: 1fr;
+    gap: var(--space-2);
+  }
+
+  .concept-arrow {
+    transform: rotate(90deg);
+    text-align: center;
+  }
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
+
+/* ============================================
+   Syntax Highlighting (Catppuccin Mocha)
+   ============================================ */
+
+.code-block .keyword { color: #cba6f7; }
+.code-block .string { color: #a6e3a1; }
+.code-block .comment { color: #6c7086; font-style: italic; }
+.code-block .function { color: #89b4fa; }
+.code-block .number { color: #fab387; }
+.code-block .operator { color: #89dceb; }
+.code-block .class-name { color: #f9e2af; }
+.code-block .punctuation { color: #bac2de; }
+.code-block .property { color: #f38ba8; }
+.code-block .tag { color: #cba6f7; }
+.code-block .attr-name { color: #89b4fa; }
+.code-block .attr-value { color: #a6e3a1; }
+
+/* TypeScript specific */
+.code-block .type { color: #f9e2af; }
+.code-block .decorator { color: #fab387; }
+.code-block .parameter { color: #eba0ac; }
+
+/* JSX specific */
+.code-block .jsx-tag { color: #f38ba8; }
+.code-block .jsx-attr { color: #89b4fa; }
+
+/* ============================================
+   Utility Classes
+   ============================================ */
+
+.text-vue { color: var(--vue-primary); }
+.text-react { color: var(--react-primary); }
+.text-muted { color: var(--text-muted); }
+.text-center { text-align: center; }
+
+.bg-vue { background: var(--vue-light); }
+.bg-react { background: var(--react-light); }
+
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mb-8 { margin-bottom: var(--space-8); }
+
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }

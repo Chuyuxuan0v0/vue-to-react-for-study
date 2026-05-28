@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>dva 数据流 - Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .dva-architecture {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      margin: var(--space-8) 0;
+    }
+
+    .dva-layer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-4);
+      margin: var(--space-2) 0;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .dva-layer.view {
+      background: var(--react-light);
+      border: 2px solid var(--react-primary);
+      color: var(--react-primary);
+    }
+
+    .dva-layer.connect {
+      background: linear-gradient(135deg, rgba(66, 184, 131, 0.1), rgba(97, 218, 251, 0.1));
+      border: 2px dashed var(--border-hover);
+      color: var(--text-secondary);
+    }
+
+    .dva-layer.model {
+      background: var(--vue-light);
+      border: 2px solid var(--vue-primary);
+      color: var(--vue-primary);
+    }
+
+    .dva-layer.service {
+      background: #fef3c7;
+      border: 2px solid var(--accent-yellow);
+      color: #92400e;
+    }
+
+    .dva-arrow {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 20px;
+      margin: var(--space-1) 0;
+    }
+
+    .model-structure {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+      margin: var(--space-6) 0;
+    }
+
+    .model-part {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      text-align: center;
+    }
+
+    .model-part-title {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: var(--space-2);
+    }
+
+    .model-part.state .model-part-title { color: var(--vue-primary); }
+    .model-part.reducers .model-part-title { color: var(--react-primary); }
+    .model-part.effects .model-part-title { color: var(--accent-purple); }
+
+    @media (max-width: 768px) {
+      .model-structure {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item active">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-breadcrumb">
+            <a href="index.html">首页</a>
+            <span>/</span>
+            <span>dva 数据流</span>
+          </div>
+          <h1 class="page-title">
+            <span class="gradient-text">dva 数据流</span>
+          </h1>
+          <p class="page-description">
+            完整掌握 dva 架构：Model、Effect、Subscription、connect
+          </p>
+        </div>
+
+        <!-- Section 1: dva Overview -->
+        <section class="section" id="overview">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🏗️</span>
+              dva 核心概念
+            </h2>
+            <p class="section-subtitle">dva = Redux + Redux-Saga + React Router + 最佳实践</p>
+          </div>
+
+          <div class="dva-architecture">
+            <div class="dva-layer view">
+              View (React 组件)
+            </div>
+            <div class="dva-arrow">↕</div>
+            <div class="dva-layer connect">
+              connect() - 连接 Model 和 View
+            </div>
+            <div class="dva-arrow">↕</div>
+            <div class="dva-layer model">
+              Model (数据模型: State + Reducers + Effects)
+            </div>
+            <div class="dva-arrow">↕</div>
+            <div class="dva-layer service">
+              Service (请求层: axios)
+            </div>
+          </div>
+
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div class="callout-content">
+              <p class="callout-title">Vue 2 开发者注意</p>
+              <p class="callout-text">
+                如果你熟悉 Vuex，dva 的概念类似但更简洁：
+                <code>State</code> ≈ Vuex State，
+                <code>Reducers</code> ≈ Vuex Mutations，
+                <code>Effects</code> ≈ Vuex Actions。
+                dva 使用 Redux-Saga 处理异步操作。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 2: Model Definition -->
+        <section class="section" id="model">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📦</span>
+              Model 定义规范
+            </h2>
+            <p class="section-subtitle">Model 是 dva 的核心，包含状态、同步操作、异步操作</p>
+          </div>
+
+          <div class="model-structure">
+            <div class="model-part state">
+              <div class="model-part-title">State</div>
+              <p style="font-size: 13px; color: var(--text-muted);">状态数据</p>
+            </div>
+            <div class="model-part reducers">
+              <div class="model-part-title">Reducers</div>
+              <p style="font-size: 13px; color: var(--text-muted);">同步更新</p>
+            </div>
+            <div class="model-part effects">
+              <div class="model-part-title">Effects</div>
+              <p style="font-size: 13px; color: var(--text-muted);">异步操作</p>
+            </div>
+          </div>
+
+          <h3>完整 Model 示例</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">models/user.ts</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">import</span> { Effect, Reducer, Subscription } <span class="keyword">from</span> <span class="string">'dva'</span>
+
+<span class="comment">// 类型定义</span>
+<span class="keyword">interface</span> <span class="class-name">UserInfo</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+  <span class="property">name</span>: <span class="type">string</span>
+  <span class="property">email</span>: <span class="type">string</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">UserModelState</span> {
+  <span class="property">currentUser</span>: <span class="class-name">UserInfo</span> | <span class="keyword">null</span>
+  <span class="property">loading</span>: <span class="type">boolean</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">UserModelType</span> {
+  <span class="property">namespace</span>: <span class="string">'user'</span>
+  <span class="property">state</span>: <span class="class-name">UserModelState</span>
+  <span class="property">effects</span>: {
+    <span class="property">fetchUser</span>: <span class="type">Effect</span>
+  }
+  <span class="property">reducers</span>: {
+    <span class="property">setUser</span>: <span class="type">Reducer</span>&lt;<span class="class-name">UserModelState</span>&gt;
+    <span class="property">clearUser</span>: <span class="type">Reducer</span>&lt;<span class="class-name">UserModelState</span>&gt;
+  }
+  <span class="property">subscriptions</span>: {
+    <span class="property">setup</span>: <span class="type">Subscription</span>
+  }
+}
+
+<span class="keyword">const</span> <span class="class-name">UserModel</span>: <span class="class-name">UserModelType</span> = {
+  <span class="property">namespace</span>: <span class="string">'user'</span>,
+
+  <span class="property">state</span>: {
+    <span class="property">currentUser</span>: <span class="keyword">null</span>,
+    <span class="property">loading</span>: <span class="keyword">false</span>
+  },
+
+  <span class="property">effects</span>: {
+    <span class="comment">// Generator 函数处理异步操作</span>
+    *<span class="function">fetchUser</span>({ <span class="property">payload</span> }, { <span class="property">call</span>, <span class="property">put</span> }) {
+      <span class="keyword">const</span> response = <span class="keyword">yield</span> call(userService.getUser, payload.id)
+      <span class="keyword">yield</span> put({
+        <span class="property">type</span>: <span class="string">'setUser'</span>,
+        <span class="property">payload</span>: response.data
+      })
+    }
+  },
+
+  <span class="property">reducers</span>: {
+    <span class="function">setUser</span>(<span class="parameter">state</span>, { <span class="property">payload</span> }) {
+      <span class="keyword">return</span> { ...state, <span class="property">currentUser</span>: payload, <span class="property">loading</span>: <span class="keyword">false</span> }
+    },
+    <span class="function">clearUser</span>() {
+      <span class="keyword">return</span> { <span class="property">currentUser</span>: <span class="keyword">null</span>, <span class="property">loading</span>: <span class="keyword">false</span> }
+    }
+  },
+
+  <span class="property">subscriptions</span>: {
+    <span class="function">setup</span>({ <span class="property">dispatch</span>, <span class="property">history</span> }) {
+      <span class="keyword">return</span> history.listen(({ <span class="property">pathname</span> }) => {
+        <span class="keyword">if</span> (pathname === <span class="string">'/user'</span>) {
+          dispatch({ <span class="property">type</span>: <span class="string">'fetchUser'</span>, <span class="property">payload</span>: { <span class="property">id</span>: <span class="string">'1'</span> } })
+        }
+      })
+    }
+  }
+}
+
+<span class="keyword">export default</span> UserModel</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 3: Connect -->
+        <section class="section" id="connect">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔗</span>
+              connect 连接组件
+            </h2>
+            <p class="section-subtitle">将 Model 的状态和方法连接到 React 组件</p>
+          </div>
+
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">pages/UserPage.tsx</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>
+<span class="keyword">import</span> { connect } <span class="keyword">from</span> <span class="string">'dva'</span>
+<span class="keyword">import</span> { Dispatch } <span class="keyword">from</span> <span class="string">'redux'</span>
+
+<span class="comment">// 类型定义</span>
+<span class="keyword">interface</span> <span class="class-name">UserInfo</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+  <span class="property">name</span>: <span class="type">string</span>
+  <span class="property">email</span>: <span class="type">string</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">UserPageProps</span> {
+  <span class="property">currentUser</span>: <span class="class-name">UserInfo</span> | <span class="keyword">null</span>
+  <span class="property">loading</span>: <span class="type">boolean</span>
+  <span class="property">dispatch</span>: <span class="type">Dispatch</span>
+}
+
+<span class="comment">// 组件</span>
+<span class="keyword">const</span> <span class="function">UserPage</span>: <span class="type">React.FC</span>&lt;<span class="class-name">UserPageProps</span>&gt; = ({
+  currentUser,
+  loading,
+  dispatch
+}) => {
+  <span class="keyword">const</span> <span class="function">handleRefresh</span> = () => {
+    dispatch({
+      <span class="property">type</span>: <span class="string">'user/fetchUser'</span>,
+      <span class="property">payload</span>: { <span class="property">id</span>: <span class="string">'1'</span> }
+    })
+  }
+
+  <span class="keyword">if</span> (loading) {
+    <span class="keyword">return</span> <span class="tag">&lt;div&gt;</span>加载中...<span class="tag">&lt;/div&gt;</span>
+  }
+
+  <span class="keyword">if</span> (!currentUser) {
+    <span class="keyword">return</span> <span class="tag">&lt;div&gt;</span>未找到用户<span class="tag">&lt;/div&gt;</span>
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>{currentUser.name}<span class="tag">&lt;/h1&gt;</span>
+      <span class="tag">&lt;p&gt;</span>{currentUser.email}<span class="tag">&lt;/p&gt;</span>
+      <span class="tag">&lt;button</span> <span class="jsx-attr">onClick</span>={handleRefresh}<span class="tag">&gt;</span>
+        刷新
+      <span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="comment">// 连接到 dva store</span>
+<span class="keyword">const</span> <span class="function">mapStateToProps</span> = (<span class="parameter">state</span>: <span class="type">any</span>) => ({
+  <span class="property">currentUser</span>: state.user.currentUser,
+  <span class="property">loading</span>: state.loading.effects[<span class="string">'user/fetchUser'</span>]
+})
+
+<span class="keyword">export default</span> connect(mapStateToProps)(UserPage)</code></pre>
+          </div>
+
+          <div class="callout tip">
+            <span class="callout-icon">💡</span>
+            <div class="callout-content">
+              <p class="callout-title">connect 参数说明</p>
+              <p class="callout-text">
+                <code>mapStateToProps</code>: 从 state 中提取数据传给组件<br>
+                <code>state.loading.effects['user/fetchUser']</code>: dva-loading 插件自动管理的 loading 状态
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 4: Effects -->
+        <section class="section" id="effects">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">⚡</span>
+              Effect 详细用法
+            </h2>
+            <p class="section-subtitle">使用 Generator 函数处理异步操作</p>
+          </div>
+
+          <h3>Effect 辅助方法</h3>
+          <div class="comparison-table-wrapper">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>方法</th>
+                  <th>说明</th>
+                  <th>示例</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>call</code></td>
+                  <td>调用异步函数</td>
+                  <td><code>yield call(api.getUser, id)</code></td>
+                </tr>
+                <tr>
+                  <td><code>put</code></td>
+                  <td>触发 reducer</td>
+                  <td><code>yield put({ type: 'setUser', payload })</code></td>
+                </tr>
+                <tr>
+                  <td><code>select</code></td>
+                  <td>从 state 中选择数据</td>
+                  <td><code>const user = yield select(state => state.user)</code></td>
+                </tr>
+                <tr>
+                  <td><code>all</code></td>
+                  <td>并行执行多个 effect</td>
+                  <td><code>yield all([call(api1), call(api2)])</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>并行请求示例</h3>
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">并行请求</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="property">effects</span>: {
+  *<span class="function">fetchDashboard</span>(_, { <span class="property">call</span>, <span class="property">put</span>, <span class="property">all</span> }) {
+    <span class="comment">// 并行请求多个接口</span>
+    <span class="keyword">const</span> [users, orders, products] = <span class="keyword">yield</span> all([
+      call(api.getUsers),
+      call(api.getOrders),
+      call(api.getProducts)
+    ])
+
+    <span class="keyword">yield</span> put({
+      <span class="property">type</span>: <span class="string">'setDashboard'</span>,
+      <span class="property">payload</span>: {
+        <span class="property">users</span>: users.data,
+        <span class="property">orders</span>: orders.data,
+        <span class="property">products</span>: products.data
+      }
+    })
+  },
+
+  *<span class="function">fetchWithSelect</span>({ <span class="property">payload</span> }, { <span class="property">call</span>, <span class="property">put</span>, <span class="property">select</span> }) {
+    <span class="comment">// 从 state 获取当前数据</span>
+    <span class="keyword">const</span> currentUser = <span class="keyword">yield</span> select(<span class="parameter">state</span> => state.user.currentUser)
+
+    <span class="keyword">if</span> (currentUser) {
+      <span class="keyword">const</span> orders = <span class="keyword">yield</span> call(api.getUserOrders, currentUser.id)
+      <span class="keyword">yield</span> put({
+        <span class="property">type</span>: <span class="string">'setOrders'</span>,
+        <span class="property">payload</span>: orders.data
+      })
+    }
+  }
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 5: Subscriptions -->
+        <section class="section" id="subscriptions">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📡</span>
+              Subscription 详解
+            </h2>
+            <p class="section-subtitle">订阅数据源，自动触发 action</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="route">
+                <span class="code-tab-dot"></span>
+                路由监听
+              </button>
+              <button class="code-tab" data-tab="event">
+                <span class="code-tab-dot"></span>
+                事件监听
+              </button>
+              <button class="code-tab" data-tab="timer">
+                <span class="code-tab-dot"></span>
+                定时器
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="route">
+              <pre class="code-block"><code><span class="property">subscriptions</span>: {
+  <span class="comment">// 监听路由变化</span>
+  <span class="function">setup</span>({ <span class="property">dispatch</span>, <span class="property">history</span> }) {
+    <span class="keyword">return</span> history.listen(({ <span class="property">pathname</span>, <span class="property">query</span> }) => {
+      <span class="keyword">if</span> (pathname === <span class="string">'/users'</span>) {
+        dispatch({
+          <span class="property">type</span>: <span class="string">'fetchUsers'</span>,
+          <span class="property">payload</span>: query
+        })
+      }
+    })
+  }
+}</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="event">
+              <pre class="code-block"><code><span class="property">subscriptions</span>: {
+  <span class="comment">// 监听键盘事件</span>
+  <span class="function">keyboard</span>({ <span class="property">dispatch</span> }) {
+    <span class="keyword">const</span> <span class="function">handler</span> = (<span class="parameter">e</span>: <span class="type">KeyboardEvent</span>) => {
+      <span class="keyword">if</span> (e.key === <span class="string">'Escape'</span>) {
+        dispatch({ <span class="property">type</span>: <span class="string">'hideModal'</span> })
+      }
+    }
+    document.addEventListener(<span class="string">'keydown'</span>, handler)
+    <span class="keyword">return</span> () => {
+      document.removeEventListener(<span class="string">'keydown'</span>, handler)
+    }
+  }
+}</code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="timer">
+              <pre class="code-block"><code><span class="property">subscriptions</span>: {
+  <span class="comment">// 定时轮询</span>
+  <span class="function">poll</span>({ <span class="property">dispatch</span> }) {
+    <span class="keyword">const</span> timer = setInterval(() => {
+      dispatch({ <span class="property">type</span>: <span class="string">'fetchLatest'</span> })
+    }, <span class="number">30000</span>) <span class="comment">// 每 30 秒</span>
+
+    <span class="comment">// 返回清理函数</span>
+    <span class="keyword">return</span> () => clearInterval(timer)
+  }
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Section 6: Service Layer -->
+        <section class="section" id="service">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔌</span>
+              Service 层封装
+            </h2>
+            <p class="section-subtitle">统一管理 API 请求</p>
+          </div>
+
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">services/user.ts</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">import</span> request <span class="keyword">from</span> <span class="string">'@/utils/request'</span> <span class="comment">// 自封装的 axios</span>
+
+<span class="comment">// 类型定义</span>
+<span class="keyword">interface</span> <span class="class-name">UserParams</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">UserData</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+  <span class="property">name</span>: <span class="type">string</span>
+  <span class="property">email</span>: <span class="type">string</span>
+}
+
+<span class="comment">// 获取用户信息</span>
+<span class="keyword">export</span> <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">getUser</span>(
+  <span class="parameter">params</span>: <span class="class-name">UserParams</span>
+): <span class="type">Promise</span>&lt;<span class="class-name">UserData</span>&gt; {
+  <span class="keyword">return</span> request.get(<span class="string">`/api/users/${params.id}`</span>)
+}
+
+<span class="comment">// 更新用户信息</span>
+<span class="keyword">export</span> <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">updateUser</span>(
+  <span class="parameter">id</span>: <span class="type">string</span>,
+  <span class="parameter">data</span>: <span class="type">Partial</span>&lt;<span class="class-name">UserData</span>&gt;
+) {
+  <span class="keyword">return</span> request.put(<span class="string">`/api/users/${id}`</span>, data)
+}
+
+<span class="comment">// 删除用户</span>
+<span class="keyword">export</span> <span class="keyword">async</span> <span class="keyword">function</span> <span class="function">deleteUser</span>(<span class="parameter">id</span>: <span class="type">string</span>) {
+  <span class="keyword">return</span> request.delete(<span class="string">`/api/users/${id}`</span>)
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Section 7: dva-loading -->
+        <section class="section" id="loading">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">⏳</span>
+              dva-loading 插件
+            </h2>
+            <p class="section-subtitle">自动管理 loading 状态</p>
+          </div>
+
+          <div class="callout info">
+            <span class="callout-icon">ℹ️</span>
+            <div class="callout-content">
+              <p class="callout-title">自动管理的 loading 状态</p>
+              <p class="callout-text">
+                dva-loading 插件会自动为每个 effect 生成 loading 状态，无需手动管理。
+              </p>
+            </div>
+          </div>
+
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">使用 dva-loading</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="comment">// 在 connect 中使用</span>
+<span class="keyword">const</span> <span class="function">mapStateToProps</span> = (<span class="parameter">state</span>: <span class="type">any</span>) => ({
+  <span class="comment">// 整个 model 的 loading</span>
+  <span class="property">userLoading</span>: state.loading.models.user,
+
+  <span class="comment">// 单个 effect 的 loading</span>
+  <span class="property">fetchLoading</span>: state.loading.effects[<span class="string">'user/fetchUser'</span>],
+
+  <span class="comment">// 全局 loading</span>
+  <span class="property">globalLoading</span>: state.loading.global
+})</code></pre>
+          </div>
+        </section>
+
+        <!-- Navigation -->
+        <div style="display: flex; justify-content: space-between; margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--border-color);">
+          <a href="02-component.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); text-decoration: none;">
+            ← 组件开发迁移
+          </a>
+          <a href="04-routing.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--vue-primary); text-decoration: none; font-weight: 600;">
+            路由迁移 →
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

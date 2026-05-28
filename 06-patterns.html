@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>业务场景对照 - Vue 2 → React 迁移指南</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <a href="index.html" class="sidebar-logo">
+          <div class="sidebar-logo-icon">V→R</div>
+          <div class="sidebar-logo-text">
+            迁移指南
+            <small>Vue 2 → React</small>
+          </div>
+        </a>
+      </div>
+      <nav class="nav-menu">
+        <div class="nav-section">
+          <div class="nav-section-title">开始</div>
+          <a href="index.html" class="nav-item">
+            <span class="nav-item-number">0</span>
+            概览
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">核心模块</div>
+          <a href="01-core-concepts.html" class="nav-item">
+            <span class="nav-item-number">1</span>
+            核心概念对比
+          </a>
+          <a href="02-component.html" class="nav-item">
+            <span class="nav-item-number">2</span>
+            组件开发迁移
+          </a>
+          <a href="03-dva.html" class="nav-item">
+            <span class="nav-item-number">3</span>
+            dva 数据流
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">生态工具</div>
+          <a href="04-routing.html" class="nav-item">
+            <span class="nav-item-number">4</span>
+            路由迁移
+          </a>
+          <a href="05-webpack.html" class="nav-item">
+            <span class="nav-item-number">5</span>
+            Webpack 4
+          </a>
+        </div>
+        <div class="nav-section">
+          <div class="nav-section-title">实战</div>
+          <a href="06-patterns.html" class="nav-item active">
+            <span class="nav-item-number">6</span>
+            业务场景对照
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="content-wrapper">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-breadcrumb">
+            <a href="index.html">首页</a>
+            <span>/</span>
+            <span>业务场景对照</span>
+          </div>
+          <h1 class="page-title">
+            <span class="gradient-text">业务场景对照</span>
+          </h1>
+          <p class="page-description">
+            高频业务场景的 Vue 2 和 React + dva + TypeScript 完整代码对照
+          </p>
+        </div>
+
+        <!-- Pattern 1: List Page -->
+        <section class="section" id="list-page">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📊</span>
+              列表查询页
+            </h2>
+            <p class="section-subtitle">表格展示 + 分页 + 搜索过滤</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + dva + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;div&gt;</span>
+    <span class="comment">&lt;!-- 搜索区域 --&gt;</span>
+    <span class="tag">&lt;div</span> <span class="attr-name">class</span>=<span class="string">"search-bar"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;input</span>
+        <span class="attr-name">v-model</span>=<span class="string">"keyword"</span>
+        <span class="attr-name">placeholder</span>=<span class="string">"搜索..."</span>
+        <span class="attr-name">@input</span>=<span class="string">"handleSearch"</span>
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+
+    <span class="comment">&lt;!-- 表格 --&gt;</span>
+    <span class="tag">&lt;el-table</span> <span class="attr-name">:data</span>=<span class="string">"list"</span> <span class="attr-name">:loading</span>=<span class="string">"loading"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;el-table-column</span> <span class="attr-name">prop</span>=<span class="string">"name"</span> <span class="attr-name">label</span>=<span class="string">"名称"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;el-table-column</span> <span class="attr-name">prop</span>=<span class="string">"status"</span> <span class="attr-name">label</span>=<span class="string">"状态"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;el-table-column</span> <span class="attr-name">label</span>=<span class="string">"操作"</span><span class="tag">&gt;</span>
+        <span class="tag">&lt;template</span> <span class="attr-name">#default</span>=<span class="string">"{ row }"</span><span class="tag">&gt;</span>
+          <span class="tag">&lt;el-button</span> <span class="attr-name">@click</span>=<span class="string">"handleEdit(row)"</span><span class="tag">&gt;</span>
+            编辑
+          <span class="tag">&lt;/el-button&gt;</span>
+        <span class="tag">&lt;/template&gt;</span>
+      <span class="tag">&lt;/el-table-column&gt;</span>
+    <span class="tag">&lt;/el-table&gt;</span>
+
+    <span class="comment">&lt;!-- 分页 --&gt;</span>
+    <span class="tag">&lt;el-pagination</span>
+      <span class="attr-name">:current-page</span>=<span class="string">"page"</span>
+      <span class="attr-name">:page-size</span>=<span class="string">"pageSize"</span>
+      <span class="attr-name">:total</span>=<span class="string">"total"</span>
+      <span class="attr-name">@current-change</span>=<span class="string">"handlePageChange"</span>
+    <span class="tag">/&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">keyword</span>: <span class="string">''</span>,
+      <span class="property">list</span>: [],
+      <span class="property">loading</span>: <span class="keyword">false</span>,
+      <span class="property">page</span>: <span class="number">1</span>,
+      <span class="property">pageSize</span>: <span class="number">10</span>,
+      <span class="property">total</span>: <span class="number">0</span>
+    }
+  },
+  <span class="function">mounted</span>() {
+    <span class="keyword">this</span>.fetchList()
+  },
+  <span class="function">methods</span>: {
+    <span class="keyword">async</span> <span class="function">fetchList</span>() {
+      <span class="keyword">this</span>.loading = <span class="keyword">true</span>
+      <span class="keyword">const</span> res = <span class="keyword">await</span> api.getList({
+        <span class="property">keyword</span>: <span class="keyword">this</span>.keyword,
+        <span class="property">page</span>: <span class="keyword">this</span>.page,
+        <span class="property">pageSize</span>: <span class="keyword">this</span>.pageSize
+      })
+      <span class="keyword">this</span>.list = res.data.list
+      <span class="keyword">this</span>.total = res.data.total
+      <span class="keyword">this</span>.loading = <span class="keyword">false</span>
+    },
+    <span class="function">handleSearch</span>() {
+      <span class="keyword">this</span>.page = <span class="number">1</span>
+      <span class="keyword">this</span>.fetchList()
+    },
+    <span class="function">handlePageChange</span>(page) {
+      <span class="keyword">this</span>.page = page
+      <span class="keyword">this</span>.fetchList()
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="comment">// models/list.ts</span>
+<span class="keyword">import</span> { Effect, Reducer } <span class="keyword">from</span> <span class="string">'dva'</span>
+
+<span class="keyword">interface</span> <span class="class-name">ListItem</span> {
+  <span class="property">id</span>: <span class="type">string</span>
+  <span class="property">name</span>: <span class="type">string</span>
+  <span class="property">status</span>: <span class="type">string</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">ListModelState</span> {
+  <span class="property">list</span>: <span class="class-name">ListItem</span>[]
+  <span class="property">total</span>: <span class="type">number</span>
+  <span class="property">page</span>: <span class="type">number</span>
+  <span class="property">keyword</span>: <span class="type">string</span>
+}
+
+<span class="keyword">interface</span> <span class="class-name">ListModelType</span> {
+  <span class="property">namespace</span>: <span class="string">'list'</span>
+  <span class="property">state</span>: <span class="class-name">ListModelState</span>
+  <span class="property">effects</span>: {
+    <span class="property">fetchList</span>: <span class="type">Effect</span>
+  }
+  <span class="property">reducers</span>: {
+    <span class="property">setList</span>: <span class="type">Reducer</span>&lt;<span class="class-name">ListModelState</span>&gt;
+    <span class="property">setPage</span>: <span class="type">Reducer</span>&lt;<span class="class-name">ListModelState</span>&gt;
+    <span class="property">setKeyword</span>: <span class="type">Reducer</span>&lt;<span class="class-name">ListModelState</span>&gt;
+  }
+}
+
+<span class="keyword">const</span> <span class="class-name">ListModel</span>: <span class="class-name">ListModelType</span> = {
+  <span class="property">namespace</span>: <span class="string">'list'</span>,
+
+  <span class="property">state</span>: {
+    <span class="property">list</span>: [],
+    <span class="property">total</span>: <span class="number">0</span>,
+    <span class="property">page</span>: <span class="number">1</span>,
+    <span class="property">keyword</span>: <span class="string">''</span>
+  },
+
+  <span class="property">effects</span>: {
+    *<span class="function">fetchList</span>({ <span class="property">payload</span> }, { <span class="property">call</span>, <span class="property">put</span>, <span class="property">select</span> }) {
+      <span class="keyword">const</span> { page, keyword } = <span class="keyword">yield</span> select(<span class="parameter">state</span> => state.list)
+      <span class="keyword">const</span> res = <span class="keyword">yield</span> call(api.getList, {
+        <span class="property">keyword</span>: payload?.keyword ?? keyword,
+        <span class="property">page</span>: payload?.page ?? page,
+        <span class="property">pageSize</span>: <span class="number">10</span>
+      })
+      <span class="keyword">yield</span> put({ <span class="property">type</span>: <span class="string">'setList'</span>, <span class="property">payload</span>: res.data })
+    }
+  },
+
+  <span class="property">reducers</span>: {
+    <span class="function">setList</span>(<span class="parameter">state</span>, { <span class="property">payload</span> }) {
+      <span class="keyword">return</span> { ...state, <span class="property">list</span>: payload.list, <span class="property">total</span>: payload.total }
+    },
+    <span class="function">setPage</span>(<span class="parameter">state</span>, { <span class="property">payload</span> }) {
+      <span class="keyword">return</span> { ...state, <span class="property">page</span>: payload }
+    },
+    <span class="function">setKeyword</span>(<span class="parameter">state</span>, { <span class="property">payload</span> }) {
+      <span class="keyword">return</span> { ...state, <span class="property">keyword</span>: payload, <span class="property">page</span>: <span class="number">1</span> }
+    }
+  }
+}
+
+<span class="keyword">export default</span> ListModel
+
+<span class="comment">// ============================================</span>
+<span class="comment">// pages/ListPage.tsx</span>
+<span class="comment">// ============================================</span>
+<span class="keyword">import</span> React, { useEffect } <span class="keyword">from</span> <span class="string">'react'</span>
+<span class="keyword">import</span> { connect } <span class="keyword">from</span> <span class="string">'dva'</span>
+<span class="keyword">import</span> { Table, Input, Pagination } <span class="keyword">from</span> <span class="string">'antd'</span>
+
+<span class="keyword">interface</span> <span class="class-name">ListPageProps</span> {
+  <span class="property">list</span>: <span class="class-name">ListItem</span>[]
+  <span class="property">total</span>: <span class="type">number</span>
+  <span class="property">page</span>: <span class="type">number</span>
+  <span class="property">keyword</span>: <span class="type">string</span>
+  <span class="property">loading</span>: <span class="type">boolean</span>
+  <span class="property">dispatch</span>: <span class="type">Dispatch</span>
+}
+
+<span class="keyword">const</span> <span class="function">ListPage</span>: <span class="type">React.FC</span>&lt;<span class="class-name">ListPageProps</span>&gt; = ({
+  list, total, page, keyword, loading, dispatch
+}) => {
+  useEffect(() => {
+    dispatch({ <span class="property">type</span>: <span class="string">'list/fetchList'</span> })
+  }, [page, keyword])
+
+  <span class="keyword">const</span> <span class="function">handleSearch</span> = (<span class="parameter">value</span>: <span class="type">string</span>) => {
+    dispatch({ <span class="property">type</span>: <span class="string">'list/setKeyword'</span>, <span class="property">payload</span>: value })
+  }
+
+  <span class="keyword">const</span> <span class="function">handlePageChange</span> = (<span class="parameter">newPage</span>: <span class="type">number</span>) => {
+    dispatch({ <span class="property">type</span>: <span class="string">'list/setPage'</span>, <span class="property">payload</span>: newPage })
+  }
+
+  <span class="keyword">const</span> columns = [
+    { <span class="property">title</span>: <span class="string">'名称'</span>, <span class="property">dataIndex</span>: <span class="string">'name'</span> },
+    { <span class="property">title</span>: <span class="string">'状态'</span>, <span class="property">dataIndex</span>: <span class="string">'status'</span> },
+    {
+      <span class="property">title</span>: <span class="string">'操作'</span>,
+      <span class="property">render</span>: (<span class="parameter">_:</span> <span class="type">any</span>, <span class="parameter">record:</span> <span class="class-name">ListItem</span>) => (
+        <span class="tag">&lt;Button</span> <span class="jsx-attr">onClick</span>={() => handleEdit(record)}<span class="tag">&gt;</span>
+          编辑
+        <span class="tag">&lt;/Button&gt;</span>
+      )
+    }
+  ]
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;Input.Search</span>
+        <span class="jsx-attr">value</span>={keyword}
+        <span class="jsx-attr">onChange</span>={(<span class="parameter">e</span>) => handleSearch(e.target.value)}
+        <span class="jsx-attr">placeholder</span>=<span class="string">"搜索..."</span>
+      <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;Table</span>
+        <span class="jsx-attr">dataSource</span>={list}
+        <span class="jsx-attr">columns</span>={columns}
+        <span class="jsx-attr">loading</span>={loading}
+        <span class="jsx-attr">rowKey</span>=<span class="string">"id"</span>
+        <span class="jsx-attr">pagination</span>={<span class="keyword">false</span>}
+      <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;Pagination</span>
+        <span class="jsx-attr">current</span>={page}
+        <span class="jsx-attr">total</span>={total}
+        <span class="jsx-attr">pageSize</span>={<span class="number">10</span>}
+        <span class="jsx-attr">onChange</span>={handlePageChange}
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}
+
+<span class="keyword">const</span> <span class="function">mapStateToProps</span> = (<span class="parameter">state</span>: <span class="type">any</span>) => ({
+  <span class="property">list</span>: state.list.list,
+  <span class="property">total</span>: state.list.total,
+  <span class="property">page</span>: state.list.page,
+  <span class="property">keyword</span>: state.list.keyword,
+  <span class="property">loading</span>: state.loading.effects[<span class="string">'list/fetchList'</span>]
+})
+
+<span class="keyword">export default</span> connect(mapStateToProps)(ListPage)</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pattern 2: Form Submit -->
+        <section class="section" id="form-submit">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">📝</span>
+              表单提交
+            </h2>
+            <p class="section-subtitle">表单验证 + 异步提交 + 错误处理</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;el-form</span>
+    <span class="attr-name">:model</span>=<span class="string">"form"</span>
+    <span class="attr-name">:rules</span>=<span class="string">"rules"</span>
+    <span class="attr-name">ref</span>=<span class="string">"formRef"</span>
+  <span class="tag">&gt;</span>
+    <span class="tag">&lt;el-form-item</span> <span class="attr-name">label</span>=<span class="string">"名称"</span> <span class="attr-name">prop</span>=<span class="string">"name"</span><span class="tag">&gt;</span>
+      <span class="tag">&lt;el-input</span> <span class="attr-name">v-model</span>=<span class="string">"form.name"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/el-form-item&gt;</span>
+    <span class="tag">&lt;el-form-item&gt;</span>
+      <span class="tag">&lt;el-button</span>
+        <span class="attr-name">:loading</span>=<span class="string">"submitting"</span>
+        <span class="attr-name">@click</span>=<span class="string">"handleSubmit"</span>
+      <span class="tag">&gt;</span>
+        提交
+      <span class="tag">&lt;/el-button&gt;</span>
+    <span class="tag">&lt;/el-form-item&gt;</span>
+  <span class="tag">&lt;/el-form&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="property">form</span>: { <span class="property">name</span>: <span class="string">''</span> },
+      <span class="property">submitting</span>: <span class="keyword">false</span>,
+      <span class="property">rules</span>: {
+        <span class="property">name</span>: [
+          { <span class="property">required</span>: <span class="keyword">true</span>, <span class="property">message</span>: <span class="string">'请输入名称'</span> }
+        ]
+      }
+    }
+  },
+  <span class="function">methods</span>: {
+    <span class="keyword">async</span> <span class="function">handleSubmit</span>() {
+      <span class="keyword">try</span> {
+        <span class="keyword">await</span> <span class="keyword">this</span>.$refs.formRef.validate()
+        <span class="keyword">this</span>.submitting = <span class="keyword">true</span>
+        <span class="keyword">await</span> api.submit(<span class="keyword">this</span>.form)
+        <span class="keyword">this</span>.$message.success(<span class="string">'提交成功'</span>)
+      } <span class="keyword">catch</span> (error) {
+        <span class="keyword">this</span>.$message.error(<span class="string">'提交失败'</span>)
+      } <span class="keyword">finally</span> {
+        <span class="keyword">this</span>.submitting = <span class="keyword">false</span>
+      }
+    }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="keyword">import</span> React, { useState } <span class="keyword">from</span> <span class="string">'react'</span>
+<span class="keyword">import</span> { Form, Input, Button, message } <span class="keyword">from</span> <span class="string">'antd'</span>
+
+<span class="keyword">interface</span> <span class="class-name">FormValues</span> {
+  <span class="property">name</span>: <span class="type">string</span>
+}
+
+<span class="keyword">const</span> <span class="function">SubmitPage</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> [form] = Form.useForm&lt;<span class="class-name">FormValues</span>&gt;()
+  <span class="keyword">const</span> [submitting, setSubmitting] = useState(<span class="keyword">false</span>)
+
+  <span class="keyword">const</span> <span class="function">handleSubmit</span> = <span class="keyword">async</span> (<span class="parameter">values</span>: <span class="class-name">FormValues</span>) => {
+    setSubmitting(<span class="keyword">true</span>)
+    <span class="keyword">try</span> {
+      <span class="keyword">await</span> api.submit(values)
+      message.success(<span class="string">'提交成功'</span>)
+      form.resetFields()
+    } <span class="keyword">catch</span> (error) {
+      message.error(<span class="string">'提交失败'</span>)
+    } <span class="keyword">finally</span> {
+      setSubmitting(<span class="keyword">false</span>)
+    }
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;Form</span>
+      <span class="jsx-attr">form</span>={form}
+      <span class="jsx-attr">onFinish</span>={handleSubmit}
+    <span class="tag">&gt;</span>
+      <span class="tag">&lt;Form.Item</span>
+        <span class="jsx-attr">name</span>=<span class="string">"name"</span>
+        <span class="jsx-attr">rules</span>={[{ <span class="jsx-attr">required</span>: <span class="keyword">true</span>, <span class="jsx-attr">message</span>: <span class="string">'请输入名称'</span> }]}
+        <span class="jsx-attr">label</span>=<span class="string">"名称"</span>
+      <span class="tag">&gt;</span>
+        <span class="tag">&lt;Input /&gt;</span>
+      <span class="tag">&lt;/Form.Item&gt;</span>
+
+      <span class="tag">&lt;Form.Item&gt;</span>
+        <span class="tag">&lt;Button</span>
+          <span class="jsx-attr">type</span>=<span class="string">"primary"</span>
+          <span class="jsx-attr">htmlType</span>=<span class="string">"submit"</span>
+          <span class="jsx-attr">loading</span>={submitting}
+        <span class="tag">&gt;</span>
+          提交
+        <span class="tag">&lt;/Button&gt;</span>
+      <span class="tag">&lt;/Form.Item&gt;</span>
+    <span class="tag">&lt;/Form&gt;</span>
+  )
+}
+
+<span class="keyword">export default</span> SubmitPage</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pattern 3: Modal -->
+        <section class="section" id="modal">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">💬</span>
+              弹窗组件
+            </h2>
+            <p class="section-subtitle">父子组件通信、控制显示隐藏</p>
+          </div>
+
+          <div class="code-tabs">
+            <div class="code-tabs-header">
+              <button class="code-tab active" data-tab="vue">
+                <span class="code-tab-dot"></span>
+                Vue 2
+              </button>
+              <button class="code-tab" data-tab="react">
+                <span class="code-tab-dot"></span>
+                React + TypeScript
+              </button>
+            </div>
+            <div class="code-tab-content active" data-tab="vue">
+              <pre class="code-block"><code><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;el-dialog</span>
+    <span class="attr-name">:visible</span>=<span class="string">"visible"</span>
+    <span class="attr-name">@close</span>=<span class="string">"$emit('close')"</span>
+  <span class="tag">&gt;</span>
+    <span class="tag">&lt;p&gt;</span>弹窗内容<span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;/el-dialog&gt;</span>
+<span class="tag">&lt;/template&gt;</span>
+
+<span class="tag">&lt;script&gt;</span>
+<span class="keyword">export default</span> {
+  <span class="function">props</span>: {
+    <span class="property">visible</span>: { <span class="property">type</span>: Boolean, <span class="property">required</span>: <span class="keyword">true</span> }
+  }
+}
+<span class="tag">&lt;/script&gt;</span></code></pre>
+            </div>
+            <div class="code-tab-content" data-tab="react">
+              <pre class="code-block"><code><span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>
+<span class="keyword">import</span> { Modal } <span class="keyword">from</span> <span class="string">'antd'</span>
+
+<span class="keyword">interface</span> <span class="class-name">MyModalProps</span> {
+  <span class="property">visible</span>: <span class="type">boolean</span>
+  <span class="property">onClose</span>: () => <span class="type">void</span>
+  <span class="property">onConfirm</span>: () => <span class="type">Promise</span>&lt;<span class="type">void</span>&gt;
+}
+
+<span class="keyword">const</span> <span class="function">MyModal</span>: <span class="type">React.FC</span>&lt;<span class="class-name">MyModalProps</span>&gt; = ({
+  visible,
+  onClose,
+  onConfirm
+}) => {
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;Modal</span>
+      <span class="jsx-attr">visible</span>={visible}
+      <span class="jsx-attr">onCancel</span>={onClose}
+      <span class="jsx-attr">onOk</span>={onConfirm}
+    <span class="tag">&gt;</span>
+      <span class="tag">&lt;p&gt;</span>弹窗内容<span class="tag">&lt;/p&gt;</span>
+    <span class="tag">&lt;/Modal&gt;</span>
+  )
+}
+
+<span class="comment">// 使用</span>
+<span class="keyword">const</span> <span class="function">Parent</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> [visible, setVisible] = useState(<span class="keyword">false</span>)
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;&gt;</span>
+      <span class="tag">&lt;Button</span> <span class="jsx-attr">onClick</span>={() => setVisible(<span class="keyword">true</span>)}<span class="tag">&gt;</span>
+        打开弹窗
+      <span class="tag">&lt;/Button&gt;</span>
+      <span class="tag">&lt;MyModal</span>
+        <span class="jsx-attr">visible</span>={visible}
+        <span class="jsx-attr">onClose</span>={() => setVisible(<span class="keyword">false</span>)}
+        <span class="jsx-attr">onConfirm</span>={<span class="keyword">async</span> () => {
+          <span class="comment">// 处理确认</span>
+          setVisible(<span class="keyword">false</span>)
+        }}
+      <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/&gt;</span>
+  )
+}</code></pre>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pattern 4: Permission -->
+        <section class="section" id="permission">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="section-title-icon">🔐</span>
+              权限控制
+            </h2>
+            <p class="section-subtitle">路由守卫、按钮权限、数据权限</p>
+          </div>
+
+          <div class="code-block-wrapper">
+            <div class="code-block-header">
+              <div class="code-block-dots">
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+                <span class="code-block-dot"></span>
+              </div>
+              <span class="code-block-title">hooks/usePermission.ts</span>
+              <button class="code-block-copy">复制</button>
+            </div>
+            <pre class="code-block"><code><span class="keyword">import</span> { useModel } <span class="keyword">from</span> <span class="string">'@@/plugin-model/useModel'</span>
+
+<span class="comment">// 权限 Hook</span>
+<span class="keyword">export</span> <span class="keyword">function</span> <span class="function">usePermission</span>() {
+  <span class="keyword">const</span> { initialState } = useModel(<span class="string">'@@initialState'</span>)
+  <span class="keyword">const</span> { permissions = [] } = initialState || {}
+
+  <span class="keyword">const</span> <span class="function">hasPermission</span> = (<span class="parameter">code</span>: <span class="type">string</span>) => {
+    <span class="keyword">return</span> permissions.includes(code)
+  }
+
+  <span class="keyword">return</span> { hasPermission, permissions }
+}
+
+<span class="comment">// 在组件中使用</span>
+<span class="keyword">const</span> <span class="function">UserList</span>: <span class="type">React.FC</span> = () => {
+  <span class="keyword">const</span> { hasPermission } = usePermission()
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      {hasPermission(<span class="string">'user:create'</span>) && (
+        <span class="tag">&lt;Button</span> <span class="jsx-attr">type</span>=<span class="string">"primary"</span><span class="tag">&gt;</span>
+          新建用户
+        <span class="tag">&lt;/Button&gt;</span>
+      )}
+    <span class="tag">&lt;/div&gt;</span>
+  )
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- Navigation -->
+        <div style="display: flex; justify-content: space-between; margin-top: var(--space-12); padding-top: var(--space-8); border-top: 1px solid var(--border-color);">
+          <a href="05-webpack.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--text-secondary); text-decoration: none;">
+            ← Webpack 4
+          </a>
+          <a href="index.html" style="display: flex; align-items: center; gap: var(--space-2); color: var(--vue-primary); text-decoration: none; font-weight: 600;">
+            返回首页 →
+          </a>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>
